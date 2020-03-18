@@ -6,6 +6,7 @@
 
 chrome.browserAction.onClicked.addListener(function(tab) {
   openOrFocusBackgroundPage();
+  // fetchHistoryWords();
 });
 
 // Open options page
@@ -25,6 +26,32 @@ function openOrFocusBackgroundPage() {
      chrome.tabs.create({url: 'index.html'});
    }
   });
+}
+
+
+function fetchHistoryWords() {
+  var transformWordHistory;
+
+  chrome.runtime.sendMessage('mgijmajocgfcbeboacabfgobmjgjcoja', {getHistory: true}, {}, function(words) {
+    var w = transformWordHistory(words);
+    console.log(w);
+  });
+
+  // transform word history from google dictionary into our format
+  transformWordHistory = function (words) {
+    // words in an object which key is the word and value is the definition
+    var vocabWords = [];
+    var k, splited;
+    for (k in words){
+      if (words.hasOwnProperty(k)) {
+        splited = k.split('<');
+        if (splited.length >= 3) {
+          vocabWords.push({from: splited[0], to: splited[1], word: splited[2], definition: words[k]});
+        }
+      }
+    }
+    return vocabWords;
+  };
 }
 
 

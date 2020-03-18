@@ -176,7 +176,7 @@ packages:
     source: hosted
     version: "0.3.3"
   js:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: js
       url: "https://pub.dartlang.org"
@@ -484,9 +484,9 @@ packages:
   webext:
     dependency: "direct main"
     description:
-      name: webext
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: webext
+      relative: true
+    source: path
     version: "0.1.3"
   xml:
     dependency: transitive
