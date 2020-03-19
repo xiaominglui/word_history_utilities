@@ -3,27 +3,29 @@ import 'dart:async';
 // import 'dart:html';
 
 import 'package:flutter/material.dart';
-import 'package:webext/webext.dart';
+// import 'package:webext/webext.dart';
+import 'chromeext.dart' as Chrome;
+import 'chromeext.dart' show SendMessageOptions;
+import 'chromeext.dart' show SendMessageMessage;
 
 
-Future<dynamic> fetchHistoryWords() async {
+Future fetchHistoryWords() async {
   print('to sendMessage');
 
   try {
-    await BrowserAction.instance.setBadgeText("42");
-    
     print('hello');
     // response = await Runtime.runtime.sendMessage(
     //                 "mgijmajocgfcbeboacabfgobmjgjcoja", {}, null);
 
     // return Album.fromJson(json.decode(response));
-    final res = await Runtime.runtime.sendMessage("mgijmajocgfcbeboacabfgobmjgjcoja", {}, null)
-    .then((value) => print('v:$value'))
-    .catchError((err) => print('err: $err'))
-    .whenComplete(() => print('complete'));
+
+    final res = await Chrome.ChromeExt.sendMessage("mgijmajocgfcbeboacabfgobmjgjcoja", new SendMessageMessage(getHistory: true), new SendMessageOptions(includeTlsChannelId: false));
     print('world');
+    print(res);
 
     // https://github.com/dart-lang/sdk/issues/33134
+
+    // Error handling response: NoSuchMethodError: method not found: 'call' Receiver: Closure 'minified:Lv' Arguments: []
     return res;
   } catch (err) {
     print('Caught error: $err');

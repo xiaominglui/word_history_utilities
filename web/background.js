@@ -33,6 +33,7 @@ function fetchHistoryWords() {
   var transformWordHistory;
 
   chrome.runtime.sendMessage('mgijmajocgfcbeboacabfgobmjgjcoja', {getHistory: true}, {}, function(words) {
+    console.log(words);
     var w = transformWordHistory(words);
     console.log(w);
   });

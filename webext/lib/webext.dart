@@ -1,6 +1,7 @@
 library webext;
 
 import 'dart:async';
+import 'dart:js';
 import 'dart:js' as js;
 
 import 'package:js/js.dart' as js;
@@ -9,7 +10,7 @@ import 'package:webext/webext.dart';
 import 'src/js/browser_action.dart' as js;
 import 'src/js/notifications.dart' as js;
 import 'src/js/runtime.dart' as js;
-import 'src/js/runtime.dart' show SendMessageOptions;
+export 'src/js/runtime.dart' show SendMessageOptions;
 import 'src/js/tabs.dart' as js;
 import 'src/js/tabs.dart' show Tab;
 import 'src/js/webext.dart' as js;
@@ -125,9 +126,9 @@ class Runtime {
 
   Runtime(this._js);
 
-  Future<dynamic> sendMessage(String extensionId, Object message, SendMessageOptions options) {
-    final completer = Completer<dynamic>();
-    _js.sendMessage(extensionId, message, options, _newCallback1(completer));
+  Future<Object> sendMessage(String extensionId, Object message, SendMessageOptions options) {
+    final completer = Completer<JsArray>();
+    _js.sendMessage(extensionId, message, options, _newSendMessageCallback1(completer));
     return completer.future;
   }
 }
@@ -170,6 +171,13 @@ void Function() _newCallback0(Completer<void> completer) {
 void Function(T d) _newCallback1<T>(Completer<T> completer) {
   return js.allowInterop((T d) {
     print('complete');
-    completer.complete(d);
+    completer.complete();
+  });
+}
+
+void Function(dynamic o) _newSendMessageCallback1<JsArray>(Completer<dynamic> completer) {
+  return js.allowInterop((dynamic o) {
+    print('complete');
+    completer.complete(o);
   });
 }
