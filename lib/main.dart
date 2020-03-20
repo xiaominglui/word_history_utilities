@@ -1,50 +1,53 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:js';
 // import 'dart:convert';
 // import 'dart:html';
 
 import 'package:flutter/material.dart';
 // import 'package:webext/webext.dart';
-import 'chromeext.dart' as Chrome;
-import 'chromeext.dart' show SendMessageOptions;
-import 'chromeext.dart' show SendMessageMessage;
+import 'chrome_extension.dart' as Chrome;
+import 'chrome_extension.dart' show SendMessageOptions;
+import 'chrome_extension.dart' show SendMessageMessage;
 
 
-Future fetchHistoryWords() async {
+Future<List<HistoryWord>> fetchHistoryWords() async {
   print('to sendMessage');
 
   try {
-    print('hello');
-    // response = await Runtime.runtime.sendMessage(
-    //                 "mgijmajocgfcbeboacabfgobmjgjcoja", {}, null);
+    print('hello?');
+    final result = await Chrome.Extension.sendMessage("mgijmajocgfcbeboacabfgobmjgjcoja", new SendMessageMessage(getHistory: true), new SendMessageOptions(includeTlsChannelId: false));
 
-    // return Album.fromJson(json.decode(response));
-
-    final res = await Chrome.ChromeExt.sendMessage("mgijmajocgfcbeboacabfgobmjgjcoja", new SendMessageMessage(getHistory: true), new SendMessageOptions(includeTlsChannelId: false));
-    print('world');
-    print(res);
-
-    // https://github.com/dart-lang/sdk/issues/33134
-
-    // Error handling response: NoSuchMethodError: method not found: 'call' Receiver: Closure 'minified:Lv' Arguments: []
-    return res;
+    Map obj = jsonDecode(Chrome.stringify(result));
+    var historyWords = <HistoryWord>[];
+    obj.forEach((key, value) {
+      var splited = key.toString().split('<');
+      if (splited.length >= 3) {
+        historyWords.add(HistoryWord(from: splited[0], to: splited[1], word: splited[2], definition: value));
+      }
+    });
+    print('world!');
+    return historyWords;
   } catch (err) {
     print('Caught error: $err');
     throw Exception('Failed to load history words');
   }
 }
 
-class Album {
-  final int userId;
-  final int id;
-  final String title;
+class HistoryWord {
+  final String from;
+  final String to;
+  final String word;
+  final String definition;
 
-  Album({this.userId, this.id, this.title});
+  HistoryWord({this.from, this.to, this.word, this.definition});
 
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return Album(
-      userId: json['userId'],
-      id: json['id'],
-      title: json['title'],
+  factory HistoryWord.fromJson(Map<String, dynamic> json) {
+    return HistoryWord(
+      from: json['from'],
+      to: json['to'],
+      word: json['word'],
+      definition: json['definition'],
     );
   }
 }
@@ -82,11 +85,11 @@ Future<dynamic> futureWords;
           title: Text('Fetch Data Example'),
         ),
         body: Center(
-          child: FutureBuilder<dynamic>(
+          child: FutureBuilder<List<HistoryWord>>(
             future: futureWords,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return Text(snapshot.data);
+                return Text(snapshot.data[1].word);
               } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
               }

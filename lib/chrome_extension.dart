@@ -3,13 +3,15 @@ library chromeext;
 
 import 'package:js/js.dart';
 import 'dart:async';
+import 'dart:js';
+import 'dart:convert';
 
-class ChromeExt {
-  static Future<dynamic> sendMessage(
+class Extension {
+  static Future sendMessage(
       String extensionId, dynamic message, SendMessageOptions options) {
     Completer completer = new Completer();
-    ChromeExtApi.sendMessage(extensionId, message, options,
-        allowInterop(([dynamic result]) {
+    ChromeRuntimeApi.sendMessage(extensionId, message, options,
+        allowInterop(([var result]) {
       if (result != null) {
         print('complete with result');
         completer.complete(result);
@@ -23,12 +25,19 @@ class ChromeExt {
 }
 
 @JS('chrome.runtime')
-class ChromeExtApi {
+class ChromeRuntimeApi {
+  // Invokes the JavaScript getter `chrome.runtime.lastError`.
+  external Map get lastError;
+
   external static sendMessage(dynamic message,
       [String extensionId,
       SendMessageOptions options,
-      Function responseCallback([dynamic result])]);
+      Function responseCallback([result])]);
 }
+
+// Calls invoke JavaScript `JSON.stringify(obj)`.
+@JS("JSON.stringify")
+external String stringify(obj);
 
 @JS()
 @anonymous

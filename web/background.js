@@ -6,7 +6,7 @@
 
 chrome.browserAction.onClicked.addListener(function(tab) {
   openOrFocusBackgroundPage();
-  // fetchHistoryWords();
+  fetchHistoryWords();
 });
 
 // Open options page
@@ -33,8 +33,10 @@ function fetchHistoryWords() {
   var transformWordHistory;
 
   chrome.runtime.sendMessage('mgijmajocgfcbeboacabfgobmjgjcoja', {getHistory: true}, {}, function(words) {
+    console.log(typeof words);
     console.log(words);
     var w = transformWordHistory(words);
+    console.log(typeof w);
     console.log(w);
   });
 
