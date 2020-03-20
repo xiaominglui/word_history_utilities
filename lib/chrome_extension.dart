@@ -3,10 +3,13 @@ library chromeext;
 
 import 'package:js/js.dart';
 import 'dart:async';
-import 'dart:js';
-import 'dart:convert';
+// import 'dart:js';
 
 class Extension {
+  static Map lastError() {
+    return ChromeRuntimeApi.lastError;
+  }
+
   static Future sendMessage(
       String extensionId, dynamic message, SendMessageOptions options) {
     Completer completer = new Completer();
@@ -27,7 +30,7 @@ class Extension {
 @JS('chrome.runtime')
 class ChromeRuntimeApi {
   // Invokes the JavaScript getter `chrome.runtime.lastError`.
-  external Map get lastError;
+  external static Map get lastError;
 
   external static sendMessage(dynamic message,
       [String extensionId,

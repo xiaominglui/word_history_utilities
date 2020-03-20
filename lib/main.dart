@@ -1,36 +1,44 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:js';
-// import 'dart:convert';
-// import 'dart:html';
+// import 'dart:js';
 
 import 'package:flutter/material.dart';
-// import 'package:webext/webext.dart';
 import 'chrome_extension.dart' as Chrome;
 import 'chrome_extension.dart' show SendMessageOptions;
 import 'chrome_extension.dart' show SendMessageMessage;
-
 
 Future<List<HistoryWord>> fetchHistoryWords() async {
   print('to sendMessage');
 
   try {
     print('hello?');
-    final result = await Chrome.Extension.sendMessage("mgijmajocgfcbeboacabfgobmjgjcoja", new SendMessageMessage(getHistory: true), new SendMessageOptions(includeTlsChannelId: false));
+    final result = await Chrome.Extension.sendMessage(
+        "mgijmajocgfcbeboacabfgobmjgjcoja",
+        new SendMessageMessage(getHistory: true),
+        new SendMessageOptions(includeTlsChannelId: false));
 
     Map obj = jsonDecode(Chrome.stringify(result));
     var historyWords = <HistoryWord>[];
     obj.forEach((key, value) {
       var splited = key.toString().split('<');
       if (splited.length >= 3) {
-        historyWords.add(HistoryWord(from: splited[0], to: splited[1], word: splited[2], definition: value));
+        historyWords.add(HistoryWord(
+            from: splited[0],
+            to: splited[1],
+            word: splited[2],
+            definition: value));
       }
     });
     print('world!');
     return historyWords;
   } catch (err) {
     print('Caught error: $err');
-    throw Exception('Failed to load history words');
+    var le = Chrome.Extension.lastError();
+    if (le != null) {
+      throw Exception('err: ${le.toString()}');
+    } else {
+      throw Exception('Failed to load history words');
+    }
   }
 }
 
@@ -55,16 +63,14 @@ class HistoryWord {
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
-  
   MyApp({Key key}) : super(key: key);
 
   @override
   _MyAppState createState() => _MyAppState();
-
 }
 
 class _MyAppState extends State<MyApp> {
-Future<dynamic> futureWords;
+  Future<dynamic> futureWords;
 
   @override
   void initState() {
@@ -89,7 +95,20 @@ Future<dynamic> futureWords;
             future: futureWords,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return Text(snapshot.data[1].word);
+                var dr = snapshot.data
+                    .map((val) => DataRow(cells: [
+                          DataCell(Text(val.from)),
+                          DataCell(Text(val.to)),
+                          DataCell(Text(val.word)),
+                          DataCell(Text(val.definition)),
+                        ]))
+                    .toList();
+                return DataTable(columns: [
+                  DataColumn(label: Text('from')),
+                  DataColumn(label: Text('to')),
+                  DataColumn(label: Text('word')),
+                  DataColumn(label: Text('def')),
+                ], rows: dr);
               } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
               }
