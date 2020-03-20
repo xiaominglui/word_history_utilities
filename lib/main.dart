@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-// import 'dart:js';
 
 import 'package:flutter/material.dart';
 import 'chrome_extension.dart' as Chrome;
@@ -103,12 +102,19 @@ class _MyAppState extends State<MyApp> {
                           DataCell(Text(val.definition)),
                         ]))
                     .toList();
-                return DataTable(columns: [
-                  DataColumn(label: Text('from')),
-                  DataColumn(label: Text('to')),
-                  DataColumn(label: Text('word')),
-                  DataColumn(label: Text('def')),
-                ], rows: dr);
+                return Scrollbar(
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      DataTable(columns: [
+                        DataColumn(label: Text('from')),
+                        DataColumn(label: Text('to')),
+                        DataColumn(label: Text('word')),
+                        DataColumn(label: Text('def')),
+                      ], rows: dr),
+                    ],
+                  ),
+                );
               } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
               }
