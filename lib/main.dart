@@ -12,9 +12,10 @@ Future<HistoryWordSnapshot> fetchHistoryWords() async {
   try {
     print('hello?');
     final result = await Chrome.Extension.sendMessage(
-        "mgijmajocgfcbeboacabfgobmjgjcoja",
-        new SendMessageMessage(getHistory: true),
-        new SendMessageOptions(includeTlsChannelId: false));
+            "mgijmajocgfcbeboacabfgobmjgjcoja",
+            new SendMessageMessage(getHistory: true),
+            new SendMessageOptions(includeTlsChannelId: false))
+        .timeout(const Duration(seconds: 5));
 
     Map obj = jsonDecode(Chrome.stringify(result));
     var ts = new DateTime.now().millisecondsSinceEpoch;
@@ -31,18 +32,24 @@ Future<HistoryWordSnapshot> fetchHistoryWords() async {
       }
     });
 
-    var snapshot = HistoryWordSnapshot(timestamp: ts,
-    historyWords: hw);
-    print('world! ${hw.length} @ $ts');
-    return snapshot;
-  } catch (err) {
-    print('Caught error: $err');
+    if (hw.length > 0) {
+      var snapshot = HistoryWordSnapshot(timestamp: ts, historyWords: hw);
+      print('world! ${hw.length} @ $ts');
+      return snapshot;
+    } else {
+      throw Exception('your word history is empty');
+    }
+  } on Error catch (e) {
+    print('Caught error: $e');
     var le = Chrome.Extension.lastError();
     if (le != null) {
       throw Exception('err: ${le.toString()}');
     } else {
       throw Exception('Failed to load history words');
     }
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    throw Exception('load history words timeout');
   }
 }
 
