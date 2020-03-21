@@ -53,11 +53,30 @@ Future<HistoryWordSnapshot> fetchHistoryWords() async {
   }
 }
 
+class ChallengingWordSnapshot {
+  final int timestamp;
+  final List<ChallengingWord> challengingWords;
+
+  ChallengingWordSnapshot({this.timestamp, this.challengingWords});
+}
+
 class HistoryWordSnapshot {
   final int timestamp;
   final List<HistoryWord> historyWords;
 
   HistoryWordSnapshot({this.timestamp, this.historyWords});
+}
+
+class ChallengingWord {
+  final String from;
+  final String to;
+  final String word;
+
+  final bool isNew = true;
+  final bool deleted = false;
+
+
+  ChallengingWord({this.from, this.to, this.word});
 }
 
 class HistoryWord {
