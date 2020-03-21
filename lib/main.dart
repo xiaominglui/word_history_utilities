@@ -6,7 +6,7 @@ import 'chrome_extension.dart' as Chrome;
 import 'chrome_extension.dart' show SendMessageOptions;
 import 'chrome_extension.dart' show SendMessageMessage;
 
-Future<List<HistoryWord>> fetchHistoryWords() async {
+Future<HistoryWordSnapshot> fetchHistoryWords() async {
   print('to sendMessage');
 
   try {
@@ -17,19 +17,24 @@ Future<List<HistoryWord>> fetchHistoryWords() async {
         new SendMessageOptions(includeTlsChannelId: false));
 
     Map obj = jsonDecode(Chrome.stringify(result));
-    var historyWords = <HistoryWord>[];
+    var ts = new DateTime.now().millisecondsSinceEpoch;
+
+    var hw = <HistoryWord>[];
     obj.forEach((key, value) {
       var splited = key.toString().split('<');
       if (splited.length >= 3) {
-        historyWords.add(HistoryWord(
+        hw.add(HistoryWord(
             from: splited[0],
             to: splited[1],
             word: splited[2],
             definition: value));
       }
     });
-    print('world!');
-    return historyWords;
+
+    var snapshot = HistoryWordSnapshot(timestamp: ts,
+    historyWords: hw);
+    print('world! ${hw.length} @ $ts');
+    return snapshot;
   } catch (err) {
     print('Caught error: $err');
     var le = Chrome.Extension.lastError();
@@ -39,6 +44,13 @@ Future<List<HistoryWord>> fetchHistoryWords() async {
       throw Exception('Failed to load history words');
     }
   }
+}
+
+class HistoryWordSnapshot {
+  final int timestamp;
+  final List<HistoryWord> historyWords;
+
+  HistoryWordSnapshot({this.timestamp, this.historyWords});
 }
 
 class HistoryWord {
@@ -81,20 +93,20 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fetch Data Example',
+      title: 'A MaterialApp Title',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Fetch Data Example'),
+          title: Text('A AppBar Title'),
         ),
         body: Center(
-          child: FutureBuilder<List<HistoryWord>>(
+          child: FutureBuilder<HistoryWordSnapshot>(
             future: futureWords,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                var dr = snapshot.data
+                var dr = snapshot.data.historyWords
                     .map((val) => DataRow(cells: [
                           DataCell(Text(val.from)),
                           DataCell(Text(val.to)),
