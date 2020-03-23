@@ -18,7 +18,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'A MaterialApp Title',
+      title: 'Word History Utilities for Google Dictionary Extension',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
