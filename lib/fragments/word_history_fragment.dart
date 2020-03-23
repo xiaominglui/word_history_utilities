@@ -113,7 +113,7 @@ class HistoryWord {
   }
 }
 
-class _MyAppState extends State<WordHistoryFragment> {
+class _WordHistoryFragmentState extends State<WordHistoryFragment> {
   Future<dynamic> futureWords;
 
   @override
@@ -125,63 +125,56 @@ class _MyAppState extends State<WordHistoryFragment> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return new Scaffold(
-        appBar: AppBar(
-          title: Text('A AppBar Title'),
-        ),
-        body: Center(
-          child: FutureBuilder<WordHistorySnapshot>(
-            future: futureWords,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var dr = snapshot.data.historyWords
-                    .map((val) => DataRow(cells: [
-                          DataCell(Text(val.from)),
-                          DataCell(Text(val.to)),
-                          DataCell(Text(val.word)),
-                          DataCell(Text(val.definition)),
-                          DataCell(FlatButton(
-                              onPressed: () {
-                                Navigator.push(context,
-                                    MaterialPageRoute(builder: (_) {
-                                  return DetailScreen();
-                                }));
-                              },
-                              child: Text('Button'))),
-                        ]))
-                    .toList();
-                return Scrollbar(
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      DataTable(columns: [
-                        DataColumn(label: Text('from')),
-                        DataColumn(label: Text('to')),
-                        DataColumn(label: Text('word')),
-                        DataColumn(label: Text('def')),
-                        DataColumn(label: Text('remark')),
-                      ], rows: dr),
-                    ],
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              }
+    return new Center(
+      child: FutureBuilder<WordHistorySnapshot>(
+        future: futureWords,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            var dr = snapshot.data.historyWords
+                .map((val) => DataRow(cells: [
+                      DataCell(Text(val.from)),
+                      DataCell(Text(val.to)),
+                      DataCell(Text(val.word)),
+                      DataCell(Text(val.definition)),
+                      DataCell(FlatButton(
+                          onPressed: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (_) {
+                              return DetailScreen();
+                            }));
+                          },
+                          child: Text('Button'))),
+                    ]))
+                .toList();
+            return Scrollbar(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  DataTable(columns: [
+                    DataColumn(label: Text('from')),
+                    DataColumn(label: Text('to')),
+                    DataColumn(label: Text('word')),
+                    DataColumn(label: Text('def')),
+                    DataColumn(label: Text('remark')),
+                  ], rows: dr),
+                ],
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Text("${snapshot.error}");
+          }
 
-              // By default, show a loading spinner.
-              return CircularProgressIndicator();
-            },
-          ),
-        ),
-      );
+          // By default, show a loading spinner.
+          return CircularProgressIndicator();
+        },
+      ),
+    );
   }
 }
 
 class WordHistoryFragment extends StatefulWidget {
-
   WordHistoryFragment({Key key}) : super(key: key);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  _WordHistoryFragmentState createState() => _WordHistoryFragmentState();
 }
