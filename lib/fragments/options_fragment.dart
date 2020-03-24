@@ -1,11 +1,55 @@
 import 'package:flutter/material.dart';
 
-class OptionsFragment extends StatelessWidget {
+class AppOptions {
+  final bool auto_sync_on_launch;
+  final bool auto_add_new_history_word;
+
+  AppOptions({this.auto_sync_on_launch, this.auto_add_new_history_word});
+}
+
+class OptionsFragment extends StatefulWidget {
+  @override
+  _OptionsFragmentState createState() => _OptionsFragmentState();
+}
+
+class _OptionsFragmentState extends State<OptionsFragment> {
+  bool cbvAutoSync = true;
+  bool cbvAutoAdd = true;
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return new Center(
-      child: new Text("Hello OptionsFragment"),
+      child: Column(
+        children: [
+        Row(
+          children: [
+            Text('Sync word history on launch: '),
+            Checkbox(
+              value: cbvAutoSync,
+              onChanged: (value) {
+                setState(() {
+                  cbvAutoSync = value;
+                });
+              },
+            )
+          ],
+        ),
+        Row(children: [
+          Text('Add words to review list on sync: '),
+          Checkbox(
+            value: cbvAutoAdd,
+            onChanged: (value) {
+              setState(() {
+                cbvAutoAdd = value;
+              });
+            },
+          )
+        ]),
+        Row(children: <Widget>[
+          FlatButton(onPressed: () {}, child: Text('Save')),
+          FlatButton(onPressed: () {}, child: Text('Reset')),
+        ],)
+      ]),
     );
   }
 }
