@@ -16,6 +16,17 @@ class _OptionsFragmentState extends State<OptionsFragment> {
   bool cbvAutoSync = true;
   bool cbvAutoAdd = true;
 
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print('initState');
+
+    // var a = localStorage;
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Center(
