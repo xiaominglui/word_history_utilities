@@ -18,7 +18,6 @@ class OptionsFragment extends StatefulWidget {
 }
 
 class _OptionsFragmentState extends State<OptionsFragment> {
-  Future<AppOptions> options;
   bool cbvAutoSync;
   bool cbvAutoAdd;
 
@@ -26,7 +25,20 @@ class _OptionsFragmentState extends State<OptionsFragment> {
   void initState() {
     print('initState');
     super.initState();
-    options = getAppOptions();
+    getAppOptions()
+        .then((value) => updateUI(value))
+        .catchError((e) => handleError(e));
+  }
+
+  updateUI(AppOptions options) {
+    setState(() {
+      cbvAutoSync = options.auto_sync_on_launch;
+      cbvAutoAdd = options.auto_add_new_history_word;
+    });
+  }
+
+  handleError(dynamic e) {
+    print(e);
   }
 
   Future saveAppOptions(AppOptions o) async {
@@ -48,10 +60,6 @@ class _OptionsFragmentState extends State<OptionsFragment> {
       final res = await Chrome.Extension.storageLocalGet(null);
       print(Chrome.stringify(res));
       Map map = jsonDecode(Chrome.stringify(res));
-
-      map.forEach((key, value) {
-        print('k: $key, v: $value');
-      });
 
       var options = AppOptions(
           auto_add_new_history_word: map['cbvAutoAdd'],
@@ -97,7 +105,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
                 onPressed: () {
                   saveAppOptions(AppOptions(
                       auto_sync_on_launch: cbvAutoSync,
-                      auto_add_new_history_word: cbvAutoSync));
+                      auto_add_new_history_word: cbvAutoAdd));
                 },
                 child: Text('Save')),
             FlatButton(onPressed: () {}, child: Text('Reset')),
