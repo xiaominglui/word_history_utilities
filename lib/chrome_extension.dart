@@ -5,16 +5,9 @@ import 'package:js/js.dart';
 import 'dart:async';
 import 'dart:js';
 import 'dart:convert';
+import 'package:js/js_util.dart' as js;
 
 class Extension {
-
-  static Future sendMessage2(String extensionId, dynamic message, SendMessageOptions options) {
-    var completer = new ChromeCompleter.oneArg();
-
-    ChromeRuntimeApi.sendMessage(extensionId, message, options, completer.callback);
-    return completer.future;
-  }
-
   static Future sendMessage(
       String extensionId, dynamic message, SendMessageOptions options) {
     Completer completer = new Completer();
@@ -30,12 +23,64 @@ class Extension {
     }));
     return completer.future;
   }
+
+  static Future sendMessage2(
+      String extensionId, dynamic message, SendMessageOptions options) {
+    var completer = new ChromeCompleter.oneArg();
+
+    ChromeRuntimeApi.sendMessage(
+        extensionId, message, options, completer.callback);
+    return completer.future;
+  }
+
+  static Future storageSyncSet(Map<String, dynamic> items) {
+    var completer = new ChromeCompleter.noArgs();
+    ChromeStorageSyncApi.set(items, completer.callback);
+    return completer.future;
+  }
+
+  static Future storageSyncGet(dynamic keys) {
+    var completer = new ChromeCompleter.oneArg();
+    ChromeStorageSyncApi.get(keys, completer.callback);
+    return completer.future;
+  }
+
+  static Future storageLocalSet(dynamic items) {
+    var completer = new ChromeCompleter.noArgs();
+    ChromeStorageLocalApi.set(items, completer.callback);
+    return completer.future;
+  }
+
+  static Future storageLocalGet(dynamic keys) {
+    var completer = new ChromeCompleter.oneArg();
+    ChromeStorageLocalApi.get(keys, completer.callback);
+    return completer.future;
+  }
 }
 
-// Since Chrome 35.
-// Permissions:	"storage"
-@JS('chrome.storage')
-class ChromeStorageApi {
+@JS('chrome.storage.sync')
+class ChromeStorageSyncApi {
+  external static set(dynamic items, [Function callback]);
+  external static get(dynamic keys, Function callback(items));
+  external static remove(dynamic keys, [Function callback]);
+  external static clear([Function callback]);
+}
+
+@JS('chrome.storage.local')
+class ChromeStorageLocalApi {
+  external static set(dynamic items, [Function callback]);
+  external static get(dynamic keys, Function callback(items));
+  external static remove(dynamic keys, [Function callback]);
+  external static clear([Function callback]);
+}
+
+@JS('chrome.storage.local.set')
+external Future csls(Map<String, dynamic> items, [Function callback]);
+
+@JS('chrome.storage.onChanged')
+class ChromeStorageOnChangedApi {
+  external static addListener(
+      Function callback(Map<String, dynamic> changes, String areaName));
 }
 
 @JS()
@@ -73,7 +118,7 @@ class SendMessageMessage {
 
 class StorageArea extends ChromeObject {
   StorageArea();
-  StorageArea.fromProxy(JsObject jsProxy): super.fromProxy(jsProxy);
+  StorageArea.fromProxy(JsObject jsProxy) : super.fromProxy(jsProxy);
 
   /**
    * Gets one or more items from storage.
@@ -129,6 +174,13 @@ abstract class ChromeEnum {
   String toString() => value;
 }
 
+final JsObject _storage = context['chrome']['storage'];
+
+String get syncStorage {
+  JsObject ss = _storage['sync'];
+
+}
+
 final JsObject _runtime = context['chrome']['runtime'];
 
 String get lastError {
@@ -146,6 +198,7 @@ class ChromeCompleter {
 
   ChromeCompleter.noArgs() {
     this._callback = allowInterop(([_]) {
+      print('callback');
       var le = lastError;
       if (le != null) {
         _completer.completeError(le);
@@ -185,8 +238,6 @@ class ChromeCompleter {
   Function get callback => _callback;
 }
 
-
-
 dynamic jsify(dynamic obj) {
   if (obj == null || obj is num || obj is String) {
     return obj;
@@ -207,4 +258,14 @@ dynamic jsify(dynamic obj) {
   } else {
     return obj;
   }
+}
+
+Object mapToJSObj(Map<dynamic,dynamic> a){
+  var object = js.newObject();
+  a.forEach((k, v) {
+    var key = k;
+    var value = v;
+    js.setProperty(object, key, value);
+  });
+  return object;
 }

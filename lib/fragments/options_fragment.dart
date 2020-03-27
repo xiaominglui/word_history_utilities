@@ -1,4 +1,9 @@
+import 'dart:js';
+
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:convert';
+import '../chrome_extension.dart' as Chrome;
 
 class AppOptions {
   final bool auto_sync_on_launch;
@@ -13,25 +18,55 @@ class OptionsFragment extends StatefulWidget {
 }
 
 class _OptionsFragmentState extends State<OptionsFragment> {
-  bool cbvAutoSync = true;
-  bool cbvAutoAdd = true;
-
+  Future<AppOptions> options;
+  bool cbvAutoSync;
+  bool cbvAutoAdd;
 
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
     print('initState');
+    super.initState();
+    options = getAppOptions();
+  }
 
-    // var a = localStorage;
+  Future saveAppOptions(AppOptions o) async {
+    print('saveAppOptions');
+    var map = {};
+    map['cbvAutoSync'] = o.auto_sync_on_launch;
+    map['cbvAutoAdd'] = o.auto_add_new_history_word;
+    try {
+      var jsObj = Chrome.mapToJSObj(map);
+      print(Chrome.stringify(jsObj));
+      await Chrome.Extension.storageLocalSet(jsObj);
+    } catch (e) {
+      print('Caught e: $e');
+    }
+  }
 
+  Future<AppOptions> getAppOptions() async {
+    try {
+      final res = await Chrome.Extension.storageLocalGet(null);
+      print(Chrome.stringify(res));
+      Map map = jsonDecode(Chrome.stringify(res));
+
+      map.forEach((key, value) {
+        print('k: $key, v: $value');
+      });
+
+      var options = AppOptions(
+          auto_add_new_history_word: map['cbvAutoAdd'],
+          auto_sync_on_launch: map['cbvAutoSync']);
+      return options;
+    } catch (e) {
+      print('Caught e: $e');
+      throw Exception('load options err');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return new Center(
-      child: Column(
-        children: [
+      child: Column(children: [
         Row(
           children: [
             Text('Sync word history on launch: '),
@@ -56,10 +91,18 @@ class _OptionsFragmentState extends State<OptionsFragment> {
             },
           )
         ]),
-        Row(children: <Widget>[
-          FlatButton(onPressed: () {}, child: Text('Save')),
-          FlatButton(onPressed: () {}, child: Text('Reset')),
-        ],)
+        Row(
+          children: <Widget>[
+            FlatButton(
+                onPressed: () {
+                  saveAppOptions(AppOptions(
+                      auto_sync_on_launch: cbvAutoSync,
+                      auto_add_new_history_word: cbvAutoSync));
+                },
+                child: Text('Save')),
+            FlatButton(onPressed: () {}, child: Text('Reset')),
+          ],
+        )
       ]),
     );
   }

@@ -4,27 +4,41 @@
 
 'use strict';
 
-chrome.browserAction.onClicked.addListener(function(tab) {
+chrome.browserAction.onClicked.addListener(function (tab) {
   openOrFocusBackgroundPage();
-  fetchHistoryWords();
+  // debug()
+  // fetchHistoryWords();
 });
 
+
+function debug() {
+  chrome.storage.local.set({ 'key': true }, function () {
+    console.log('Value is set to ');
+  });
+
+  chrome.storage.local.get(['t'], function(result){
+    console.log('Value currently is ' + result.key);
+  });
+
+  // localStorage.setItem('k', 'v');
+
+}
 // Open options page
 function openOrFocusBackgroundPage() {
   var optionsUrl = chrome.extension.getURL('index.html');
-  chrome.tabs.query({}, function(extensionTabs) {
-   var found = false;
+  chrome.tabs.query({}, function (extensionTabs) {
+    var found = false;
 
-   for (var i=0; i < extensionTabs.length; i++) {
-    if (optionsUrl == extensionTabs[i].url) {
-     found = true;
-     chrome.tabs.update(extensionTabs[i].id, {'selected': true});
+    for (var i = 0; i < extensionTabs.length; i++) {
+      if (optionsUrl == extensionTabs[i].url) {
+        found = true;
+        chrome.tabs.update(extensionTabs[i].id, { 'selected': true });
+      }
     }
-   }
 
-   if (found == false) {
-     chrome.tabs.create({url: 'index.html'});
-   }
+    if (found == false) {
+      chrome.tabs.create({ url: 'index.html' });
+    }
   });
 }
 
@@ -32,7 +46,7 @@ function openOrFocusBackgroundPage() {
 function fetchHistoryWords() {
   var transformWordHistory;
 
-  chrome.runtime.sendMessage('mgijmajocgfcbeboacabfgobmjgjcoja', {getHistory: true}, {}, function(words) {
+  chrome.runtime.sendMessage('mgijmajocgfcbeboacabfgobmjgjcoja', { getHistory: true }, {}, function (words) {
     console.log(typeof words);
     console.log(words);
     var w = transformWordHistory(words);
@@ -45,11 +59,11 @@ function fetchHistoryWords() {
     // words in an object which key is the word and value is the definition
     var vocabWords = [];
     var k, splited;
-    for (k in words){
+    for (k in words) {
       if (words.hasOwnProperty(k)) {
         splited = k.split('<');
         if (splited.length >= 3) {
-          vocabWords.push({from: splited[0], to: splited[1], word: splited[2], definition: words[k]});
+          vocabWords.push({ from: splited[0], to: splited[1], word: splited[2], definition: words[k] });
         }
       }
     }
