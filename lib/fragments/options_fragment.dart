@@ -18,8 +18,11 @@ class OptionsFragment extends StatefulWidget {
 }
 
 class _OptionsFragmentState extends State<OptionsFragment> {
+  bool cbvAutoSyncBakup;
+  bool cbvAutoAddBakup;
   bool cbvAutoSync;
   bool cbvAutoAdd;
+  bool hasChanged = false;
 
   @override
   void initState() {
@@ -34,6 +37,8 @@ class _OptionsFragmentState extends State<OptionsFragment> {
     setState(() {
       cbvAutoSync = options.auto_sync_on_launch;
       cbvAutoAdd = options.auto_add_new_history_word;
+      cbvAutoSyncBakup = cbvAutoSync;
+      cbvAutoAddBakup = cbvAutoAdd;
     });
   }
 
@@ -82,6 +87,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
               value: cbvAutoSync,
               onChanged: (value) {
                 setState(() {
+                  hasChanged = true;
                   cbvAutoSync = value;
                 });
               },
@@ -94,6 +100,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
             value: cbvAutoAdd,
             onChanged: (value) {
               setState(() {
+                hasChanged = true;
                 cbvAutoAdd = value;
               });
             },
@@ -102,13 +109,34 @@ class _OptionsFragmentState extends State<OptionsFragment> {
         Row(
           children: <Widget>[
             FlatButton(
-                onPressed: () {
-                  saveAppOptions(AppOptions(
-                      auto_sync_on_launch: cbvAutoSync,
-                      auto_add_new_history_word: cbvAutoAdd));
-                },
+                onPressed: hasChanged
+                    ? () {
+                        saveAppOptions(AppOptions(
+                            auto_sync_on_launch: cbvAutoSync,
+                            auto_add_new_history_word: cbvAutoAdd));
+                        cbvAutoSyncBakup = cbvAutoSync;
+                        cbvAutoAddBakup = cbvAutoAdd;
+                        setState(() {
+                          hasChanged = false;
+                        });
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          content: Text('Options saved'),
+                          duration: const Duration(seconds: 3),
+                        ));
+                      }
+                    : null,
                 child: Text('Save')),
-            FlatButton(onPressed: () {}, child: Text('Reset')),
+            FlatButton(
+                onPressed: hasChanged
+                    ? () {
+                        setState(() {
+                          cbvAutoAdd = cbvAutoAddBakup;
+                          cbvAutoSync = cbvAutoSyncBakup;
+                          hasChanged = false;
+                        });
+                      }
+                    : null,
+                child: Text('Reset')),
           ],
         )
       ]),
