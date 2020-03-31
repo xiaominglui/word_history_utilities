@@ -16,7 +16,7 @@ function debug() {
     console.log('Value is set to ');
   });
 
-  chrome.storage.local.get(['t'], function(result){
+  chrome.storage.local.get(['t'], function (result) {
     console.log('Value currently is ' + result.key);
   });
 
@@ -30,7 +30,7 @@ function openOrFocusBackgroundPage() {
     var found = false;
 
     for (var i = 0; i < extensionTabs.length; i++) {
-      if (optionsUrl == extensionTabs[i].url) {
+      if (optionsUrl == extensionTabs[i].url.split('#')[0]) {
         found = true;
         chrome.tabs.update(extensionTabs[i].id, { 'selected': true });
       }
