@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import '../chrome_extension.dart' as Chrome;
 import '../chrome_extension.dart' show SendMessageOptions;
 import '../chrome_extension.dart' show SendMessageMessage;
@@ -28,12 +29,6 @@ Future<WordHistorySnapshot> fetchHistoryWords() async {
 
   try {
     print('hello?');
-
-    // final result = await Chrome.Extension.sendMessage(
-    //         "mgijmajocgfcbeboacabfgobmjgjcoja",
-    //         new SendMessageMessage(getHistory: true),
-    //         new SendMessageOptions(includeTlsChannelId: false))
-    //     .timeout(const Duration(seconds: 5));
 
     final r = await Chrome.Extension.sendMessage2(
             "mgijmajocgfcbeboacabfgobmjgjcoja",
@@ -148,19 +143,27 @@ class _WordHistoryFragmentState extends State<WordHistoryFragment> {
                           child: Text('Button'))),
                     ]))
                 .toList();
+            String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.fromMillisecondsSinceEpoch(snapshot.data.timestamp));
             return Scrollbar(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  DataTable(columns: [
-                    DataColumn(label: Text('from')),
-                    DataColumn(label: Text('to')),
-                    DataColumn(label: Text('word')),
-                    DataColumn(label: Text('def')),
-                    DataColumn(label: Text('remark')),
-                  ], rows: dr),
-                ],
-              ),
+              child: Column(children: [
+                Align(
+                    alignment: Alignment.topRight,
+                    child: Text('syncd at: $formattedDate')),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      DataTable(columns: [
+                        DataColumn(label: Text('from')),
+                        DataColumn(label: Text('to')),
+                        DataColumn(label: Text('word')),
+                        DataColumn(label: Text('def')),
+                        DataColumn(label: Text('remark')),
+                      ], rows: dr),
+                    ],
+                  ),
+                )
+              ]),
             );
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
