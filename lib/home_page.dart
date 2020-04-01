@@ -34,7 +34,24 @@ class HomePageState extends State<HomePage> {
         return new Text("Error");
     }
   }
-  
+
+  _getAppbarActions(int pos) {
+    switch (pos) {
+      case 0:
+        return [
+          IconButton(
+            icon: const Icon(Icons.sync),
+            tooltip: 'Sync history words',
+            onPressed: () {},
+          )
+        ];
+      case 1:
+        return [];
+      default:
+        return [];
+    }
+  }
+
   _onSelectItem(int index) {
     setState(() => _selectedDrawerIndex = index);
     Navigator.of(context).pop(); // close the drawer
@@ -45,14 +62,12 @@ class HomePageState extends State<HomePage> {
     List<Widget> drawerOptions = [];
     for (var i = 0; i < widget.drawerItems.length; i++) {
       var d = widget.drawerItems[i];
-      drawerOptions.add(
-        new ListTile(
-          leading: new Icon(d.icon),
-          title: new Text(d.title),
-          selected: i == _selectedDrawerIndex,
-          onTap: () => _onSelectItem(i),
-        )
-      );
+      drawerOptions.add(new ListTile(
+        leading: new Icon(d.icon),
+        title: new Text(d.title),
+        selected: i == _selectedDrawerIndex,
+        onTap: () => _onSelectItem(i),
+      ));
     }
 
     return new Scaffold(
@@ -60,6 +75,7 @@ class HomePageState extends State<HomePage> {
         // here we display the title corresponding to the fragment
         // you can instead choose to have a static title
         title: new Text(widget.drawerItems[_selectedDrawerIndex].title),
+        actions: _getAppbarActions(_selectedDrawerIndex),
       ),
       drawer: new Drawer(
         child: new Column(
