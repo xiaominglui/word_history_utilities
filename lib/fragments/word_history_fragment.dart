@@ -79,102 +79,118 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   @override
   Widget build(BuildContext context) {
+    print('build');
     return new Center(
       child: FutureBuilder<WordHistorySnapshot>(
         future: futureWords,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            var dr = snapshot.data.historyWords
-                .map((val) => DataRow(cells: [
-                      DataCell(Text(val.from)),
-                      DataCell(Text(val.to)),
-                      DataCell(Text(val.word)),
-                      DataCell(Text(val.definition)),
-                      DataCell(FlatButton(
-                          onPressed: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (_) {
-                              return DetailScreen();
-                            }));
-                          },
-                          child: Text('Button'))),
-                    ]))
-                .toList();
-            String formattedDate = DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.fromMillisecondsSinceEpoch(snapshot.data.timestamp));
-            return Scrollbar(
-              child: Column(children: [
-                Align(
-                    alignment: Alignment.topRight,
-                    child: Text('syncd at: $formattedDate')),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      DataTable(columns: [
-                        DataColumn(label: Text('from')),
-                        DataColumn(label: Text('to')),
-                        DataColumn(label: Text('word')),
-                        DataColumn(label: Text('def')),
-                        DataColumn(label: Text('remark')),
-                      ], rows: dr),
-                    ],
-                  ),
-                )
-              ]),
-            );
-          } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+              return CircularProgressIndicator();
+            default:
+              if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              } else {
+                if (snapshot.hasData) {
+                  var dr = snapshot.data.historyWords
+                      .map((val) => DataRow(cells: [
+                            DataCell(Text(val.from)),
+                            DataCell(Text(val.to)),
+                            DataCell(Text(val.word)),
+                            DataCell(Text(val.definition)),
+                            DataCell(FlatButton(
+                                onPressed: () {
+                                  Navigator.push(context,
+                                      MaterialPageRoute(builder: (_) {
+                                    return DetailScreen();
+                                  }));
+                                },
+                                child: Text('Button'))),
+                          ]))
+                      .toList();
+                  String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
+                      .format(DateTime.fromMillisecondsSinceEpoch(
+                          snapshot.data.timestamp));
+                  return Scrollbar(
+                    child: Column(children: [
+                      Align(
+                          alignment: Alignment.topRight,
+                          child: Text('syncd at: $formattedDate')),
+                      Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.all(16),
+                          children: [
+                            DataTable(columns: [
+                              DataColumn(label: Text('from')),
+                              DataColumn(label: Text('to')),
+                              DataColumn(label: Text('word')),
+                              DataColumn(label: Text('def')),
+                              DataColumn(label: Text('remark')),
+                            ], rows: dr),
+                          ],
+                        ),
+                      )
+                    ]),
+                  );
+                } else {
+                  return Text('No Data');
+                }
+              }
           }
-
-          // By default, show a loading spinner.
-          return CircularProgressIndicator();
         },
       ),
     );
   }
 
-  Future<WordHistorySnapshot> fetchHistoryWords() async {
-  print('fetchHistoryWords');
-
-  try {
-    print('hello?');
-
-    final r = await Chrome.Extension.sendMessage2(
-            "mgijmajocgfcbeboacabfgobmjgjcoja",
-            new SendMessageMessage(getHistory: true),
-            new SendMessageOptions(includeTlsChannelId: false))
-        .timeout(const Duration(seconds: 5));
-
-    Map obj = jsonDecode(Chrome.stringify(r));
-    var ts = new DateTime.now().millisecondsSinceEpoch;
-
-    var hw = <HistoryWord>[];
-    obj.forEach((key, value) {
-      var splited = key.toString().split('<');
-      if (splited.length >= 3) {
-        hw.add(HistoryWord(
-            from: splited[0],
-            to: splited[1],
-            word: splited[2],
-            definition: value));
-      }
+  void refresh() {
+    setState(() {
+      futureWords = fetchHistoryWords();
     });
-
-    if (hw.length > 0) {
-      var snapshot = WordHistorySnapshot(timestamp: ts, historyWords: hw);
-      print('world! ${hw.length} @ $ts');
-      return snapshot;
-    } else {
-      throw Exception('your word history is empty');
-    }
-  } on Error catch (e) {
-    print('Caught error: $e');
-    throw Exception('Failed to load history words');
-  } on TimeoutException catch (e) {
-    print('Timeout: $e');
-    throw Exception('load history words timeout');
   }
-}
+
+  Future<WordHistorySnapshot> fetchHistoryWords() async {
+    print('fetchHistoryWords');
+
+    try {
+      print('hello?');
+
+      final r = await Chrome.Extension.sendMessage2(
+              "mgijmajocgfcbeboacabfgobmjgjcoja",
+              new SendMessageMessage(getHistory: true),
+              new SendMessageOptions(includeTlsChannelId: false))
+          .timeout(const Duration(seconds: 5));
+
+      Map obj = jsonDecode(Chrome.stringify(r));
+      var ts = new DateTime.now().millisecondsSinceEpoch;
+
+      var hw = <HistoryWord>[];
+      obj.forEach((key, value) {
+        var splited = key.toString().split('<');
+        if (splited.length >= 3) {
+          hw.add(HistoryWord(
+              from: splited[0],
+              to: splited[1],
+              word: splited[2],
+              definition: value));
+        }
+      });
+
+      if (hw.length > 0) {
+        var snapshot = WordHistorySnapshot(timestamp: ts, historyWords: hw);
+        print('world! ${hw.length} @ $ts');
+        return snapshot;
+      } else {
+        throw Exception('your word history is empty');
+      }
+    } on Error catch (e) {
+      print('Caught error: $e');
+      throw Exception('Failed to load history words');
+    } on TimeoutException catch (e) {
+      print('Timeout: $e');
+      throw Exception('load history words timeout');
+    }
+  }
 }
 
 class WordHistoryFragment extends StatefulWidget {
