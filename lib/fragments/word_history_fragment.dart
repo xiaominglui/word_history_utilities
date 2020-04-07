@@ -24,49 +24,6 @@ class DetailScreen extends StatelessWidget {
   }
 }
 
-Future<WordHistorySnapshot> fetchHistoryWords() async {
-  print('to sendMessage');
-
-  try {
-    print('hello?');
-
-    final r = await Chrome.Extension.sendMessage2(
-            "mgijmajocgfcbeboacabfgobmjgjcoja",
-            new SendMessageMessage(getHistory: true),
-            new SendMessageOptions(includeTlsChannelId: false))
-        .timeout(const Duration(seconds: 5));
-
-    Map obj = jsonDecode(Chrome.stringify(r));
-    var ts = new DateTime.now().millisecondsSinceEpoch;
-
-    var hw = <HistoryWord>[];
-    obj.forEach((key, value) {
-      var splited = key.toString().split('<');
-      if (splited.length >= 3) {
-        hw.add(HistoryWord(
-            from: splited[0],
-            to: splited[1],
-            word: splited[2],
-            definition: value));
-      }
-    });
-
-    if (hw.length > 0) {
-      var snapshot = WordHistorySnapshot(timestamp: ts, historyWords: hw);
-      print('world! ${hw.length} @ $ts');
-      return snapshot;
-    } else {
-      throw Exception('your word history is empty');
-    }
-  } on Error catch (e) {
-    print('Caught error: $e');
-    throw Exception('Failed to load history words');
-  } on TimeoutException catch (e) {
-    print('Timeout: $e');
-    throw Exception('load history words timeout');
-  }
-}
-
 class VocabularySnapshot {
   final int timestamp;
   final List<ChallengingWord> challengingWords;
@@ -110,7 +67,7 @@ class HistoryWord {
   }
 }
 
-class _WordHistoryFragmentState extends State<WordHistoryFragment> {
+class WordHistoryFragmentState extends State<WordHistoryFragment> {
   Future<dynamic> futureWords;
 
   @override
@@ -175,11 +132,54 @@ class _WordHistoryFragmentState extends State<WordHistoryFragment> {
       ),
     );
   }
+
+  Future<WordHistorySnapshot> fetchHistoryWords() async {
+  print('fetchHistoryWords');
+
+  try {
+    print('hello?');
+
+    final r = await Chrome.Extension.sendMessage2(
+            "mgijmajocgfcbeboacabfgobmjgjcoja",
+            new SendMessageMessage(getHistory: true),
+            new SendMessageOptions(includeTlsChannelId: false))
+        .timeout(const Duration(seconds: 5));
+
+    Map obj = jsonDecode(Chrome.stringify(r));
+    var ts = new DateTime.now().millisecondsSinceEpoch;
+
+    var hw = <HistoryWord>[];
+    obj.forEach((key, value) {
+      var splited = key.toString().split('<');
+      if (splited.length >= 3) {
+        hw.add(HistoryWord(
+            from: splited[0],
+            to: splited[1],
+            word: splited[2],
+            definition: value));
+      }
+    });
+
+    if (hw.length > 0) {
+      var snapshot = WordHistorySnapshot(timestamp: ts, historyWords: hw);
+      print('world! ${hw.length} @ $ts');
+      return snapshot;
+    } else {
+      throw Exception('your word history is empty');
+    }
+  } on Error catch (e) {
+    print('Caught error: $e');
+    throw Exception('Failed to load history words');
+  } on TimeoutException catch (e) {
+    print('Timeout: $e');
+    throw Exception('load history words timeout');
+  }
+}
 }
 
 class WordHistoryFragment extends StatefulWidget {
   WordHistoryFragment({Key key}) : super(key: key);
 
   @override
-  _WordHistoryFragmentState createState() => _WordHistoryFragmentState();
+  WordHistoryFragmentState createState() => WordHistoryFragmentState();
 }

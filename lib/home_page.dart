@@ -24,10 +24,12 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _selectedDrawerIndex = 0;
 
+  final GlobalKey<WordHistoryFragmentState> _wordHistoryFragmentState = GlobalKey<WordHistoryFragmentState>();
+
   _getDrawerItemWidget(int pos) {
     switch (pos) {
       case 0:
-        return new WordHistoryFragment();
+        return new WordHistoryFragment(key: _wordHistoryFragmentState);
       case 1:
         return new OptionsFragment();
       default:
@@ -42,7 +44,9 @@ class HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.sync),
             tooltip: 'Sync history words',
-            onPressed: () {},
+            onPressed: () {
+              _wordHistoryFragmentState.currentState.fetchHistoryWords();
+            },
           )
         ];
       case 1:
