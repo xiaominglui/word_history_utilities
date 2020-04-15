@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:json_annotation/json_annotation.dart';
 import '../chrome_extension.dart' as Chrome;
 import '../chrome_extension.dart' show SendMessageOptions;
 import '../chrome_extension.dart' show SendMessageMessage;
+part 'word_history_fragment.g.dart';
 
 class DetailScreen extends StatelessWidget {
   @override
@@ -24,47 +26,29 @@ class DetailScreen extends StatelessWidget {
   }
 }
 
-class VocabularySnapshot {
-  final int timestamp;
-  final List<ChallengingWord> challengingWords;
-
-  VocabularySnapshot({this.timestamp, this.challengingWords});
-}
-
-class WordHistorySnapshot {
-  final int timestamp;
-  final List<HistoryWord> historyWords;
-
-  WordHistorySnapshot({this.timestamp, this.historyWords});
-}
-
-class ChallengingWord {
-  final String from;
-  final String to;
-  final String word;
-
-  final bool isNew = true;
-  final bool deleted = false;
-
-  ChallengingWord({this.from, this.to, this.word});
-}
-
+@JsonSerializable()
 class HistoryWord {
   final String from;
   final String to;
   final String word;
   final String definition;
+  final int storeTimestamp;
+  bool isNew = true;
+  bool deleted = false;
 
-  HistoryWord({this.from, this.to, this.word, this.definition});
+  HistoryWord(
+      {this.from,
+      this.to,
+      this.word,
+      this.definition,
+      this.storeTimestamp,
+      this.isNew,
+      this.deleted});
 
-  factory HistoryWord.fromJson(Map<String, dynamic> json) {
-    return HistoryWord(
-      from: json['from'],
-      to: json['to'],
-      word: json['word'],
-      definition: json['definition'],
-    );
-  }
+  factory HistoryWord.fromJson(Map<String, dynamic> json) =>
+      _$HistoryWordFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HistoryWordToJson(this);
 }
 
 class WordHistoryFragmentState extends State<WordHistoryFragment> {
@@ -79,9 +63,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   @override
   Widget build(BuildContext context) {
-    print('build');
     return new Center(
-      child: FutureBuilder<WordHistorySnapshot>(
+      child: FutureBuilder<List<HistoryWord>>(
         future: futureWords,
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
@@ -93,7 +76,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                 return Text("${snapshot.error}");
               } else {
                 if (snapshot.hasData) {
-                  var dr = snapshot.data.historyWords
+                  var dr = snapshot.data
                       .map((val) => DataRow(cells: [
                             DataCell(Text(val.from)),
                             DataCell(Text(val.to)),
@@ -109,14 +92,14 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                 child: Text('Button'))),
                           ]))
                       .toList();
-                  String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
-                      .format(DateTime.fromMillisecondsSinceEpoch(
-                          snapshot.data.timestamp));
+                  // String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
+                  //     .format(DateTime.fromMillisecondsSinceEpoch(
+                  //         snapshot.data.timestamp));
                   return Scrollbar(
                     child: Column(children: [
                       Align(
                           alignment: Alignment.topRight,
-                          child: Text('syncd at: $formattedDate')),
+                          child: Text('number: ${snapshot.data.length}')),
                       Expanded(
                         child: ListView(
                           padding: const EdgeInsets.all(16),
@@ -125,7 +108,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                               DataColumn(label: Text('from')),
                               DataColumn(label: Text('to')),
                               DataColumn(label: Text('word')),
-                              DataColumn(label: Text('def')),
+                              DataColumn(label: Text('definition')),
                               DataColumn(label: Text('remark')),
                             ], rows: dr),
                           ],
@@ -149,8 +132,74 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     });
   }
 
-  Future<WordHistorySnapshot> fetchHistoryWords() async {
+  Future<void> _storeCache(List<HistoryWord> historyWords) async {
+    print('storeCache');
+
+    var map = {};
+    var list = {};
+
+    historyWords.forEach((hw) {
+      String k = hw.from + '<' + hw.to + '<' + hw.word;
+      String v = hw.definition +
+          '<' +
+          hw.storeTimestamp.toString() +
+          '<' +
+          (hw.deleted ? 'true' : 'false') +
+          '<' +
+          (hw.isNew ? 'true' : 'false');
+      list[k] = v;
+    });
+
+    map['word-history-snapshot'] = Chrome.mapToJSObj(list);
+
+    try {
+      await Chrome.Extension.storageSyncSet(Chrome.mapToJSObj(map))
+          .then((value) => print('storage sync set'));
+    } catch (e) {
+      print('storeCache Caught e: $e');
+    }
+  }
+
+  Future<List<HistoryWord>> _loadCache() async {
+    print('loadCache');
+    try {
+      final result = await Chrome.Extension.storageSyncGet('word-history-snapshot');
+      Map resultMap = Chrome.mapify(result);
+      Map list = resultMap['word-history-snapshot'];
+      var hw = <HistoryWord>[];
+      list.forEach((key, value) {
+        var splitedKey = key.toString().split('<');
+        var splitedValue = value.toString().split('<');
+        hw.add(HistoryWord(
+              from: splitedKey[0],
+              to: splitedKey[1],
+              word: splitedKey[2],
+              definition: splitedValue[0],
+              storeTimestamp: int.parse(splitedValue[1]),
+              isNew: splitedValue[3].toLowerCase() == 'true',
+              deleted: splitedValue[2].toLowerCase() == 'true'));
+      });
+
+      if (hw.length > 0) {
+        return hw;
+      } else {
+        throw Exception('your word history is empty');
+      }
+    } catch (e) {
+      print('loadCache Caught e: $e');
+      throw Exception('load error');
+    }
+  }
+
+  Future<List<HistoryWord>> fetchHistoryWords() async {
     print('fetchHistoryWords');
+    List<HistoryWord> cachedHistoryWords;
+    try {
+      cachedHistoryWords = await _loadCache();
+    } catch (e) {
+      print('err: $e');
+      cachedHistoryWords = null;
+    }
 
     try {
       print('hello?');
@@ -160,26 +209,28 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
               new SendMessageMessage(getHistory: true),
               new SendMessageOptions(includeTlsChannelId: false))
           .timeout(const Duration(seconds: 5));
+      print('r=${Chrome.stringify(r)}');
 
       Map obj = jsonDecode(Chrome.stringify(r));
       var ts = new DateTime.now().millisecondsSinceEpoch;
 
-      var hw = <HistoryWord>[];
+      var remoteHistoryWords = <HistoryWord>[];
       obj.forEach((key, value) {
         var splited = key.toString().split('<');
         if (splited.length >= 3) {
-          hw.add(HistoryWord(
+          remoteHistoryWords.add(HistoryWord(
               from: splited[0],
               to: splited[1],
               word: splited[2],
-              definition: value));
+              definition: value,
+              storeTimestamp: ts));
         }
       });
 
-      if (hw.length > 0) {
-        var snapshot = WordHistorySnapshot(timestamp: ts, historyWords: hw);
-        print('world! ${hw.length} @ $ts');
-        return snapshot;
+      if (remoteHistoryWords.length > 0) {
+        print('world! ${remoteHistoryWords.length} @ $ts');
+        await _storeCache(remoteHistoryWords);
+        return remoteHistoryWords;
       } else {
         throw Exception('your word history is empty');
       }

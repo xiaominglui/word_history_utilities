@@ -12,12 +12,16 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 
 
 function debug() {
-  chrome.storage.local.set({ 'key': true }, function () {
-    console.log('Value is set to ');
-  });
-
-  chrome.storage.local.get(['t'], function (result) {
-    console.log('Value currently is ' + result.key);
+  chrome.storage.local.set({
+    "word-history": {}
+  })
+  var key = null;
+  chrome.storage.local.get("word-history", function (result) {
+    console.log('result='+JSON.stringify(result));
+    key = "key" + "<";
+    result["word-history"][key] = "value";
+    console.log('result='+JSON.stringify(result));
+    chrome.storage.local.set(result);
   });
 
   // localStorage.setItem('k', 'v');

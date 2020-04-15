@@ -74,9 +74,6 @@ class ChromeStorageLocalApi {
   external static clear([Function callback]);
 }
 
-@JS('chrome.storage.local.set')
-external Future csls(Map<String, dynamic> items, [Function callback]);
-
 @JS('chrome.storage.onChanged')
 class ChromeStorageOnChangedApi {
   external static addListener(
@@ -198,7 +195,6 @@ class ChromeCompleter {
 
   ChromeCompleter.noArgs() {
     this._callback = allowInterop(([_]) {
-      print('callback');
       var le = lastError;
       if (le != null) {
         _completer.completeError(le);

@@ -53,7 +53,6 @@ class _OptionsFragmentState extends State<OptionsFragment> {
     map['cbvAutoAdd'] = o.auto_add_new_history_word;
     try {
       var jsObj = Chrome.mapToJSObj(map);
-      print(Chrome.stringify(jsObj));
       await Chrome.Extension.storageLocalSet(jsObj);
     } catch (e) {
       print('Caught e: $e');
