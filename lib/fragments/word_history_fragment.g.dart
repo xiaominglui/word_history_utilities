@@ -6,23 +6,6 @@ part of 'word_history_fragment.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-WordHistorySnapshot _$WordHistorySnapshotFromJson(Map<String, dynamic> json) {
-  return WordHistorySnapshot(
-    timestamp: json['timestamp'] as int,
-    historyWords: (json['history_words'] as List)
-        ?.map((e) =>
-            e == null ? null : HistoryWord.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
-  );
-}
-
-Map<String, dynamic> _$WordHistorySnapshotToJson(
-        WordHistorySnapshot instance) =>
-    <String, dynamic>{
-      'timestamp': instance.timestamp,
-      'history_words': instance.historyWords?.map((e) => e?.toJson())?.toList(),
-    };
-
 HistoryWord _$HistoryWordFromJson(Map<String, dynamic> json) {
   return HistoryWord(
     from: json['from'] as String,

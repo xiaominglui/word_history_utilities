@@ -163,7 +163,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
   Future<List<HistoryWord>> _loadCache() async {
     print('loadCache');
     try {
-      final result = await Chrome.Extension.storageSyncGet('word-history-snapshot');
+      final result =
+          await Chrome.Extension.storageSyncGet('word-history-snapshot');
       Map resultMap = Chrome.mapify(result);
       Map list = resultMap['word-history-snapshot'];
       var hw = <HistoryWord>[];
@@ -171,13 +172,13 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         var splitedKey = key.toString().split('<');
         var splitedValue = value.toString().split('<');
         hw.add(HistoryWord(
-              from: splitedKey[0],
-              to: splitedKey[1],
-              word: splitedKey[2],
-              definition: splitedValue[0],
-              storeTimestamp: int.parse(splitedValue[1]),
-              isNew: splitedValue[3].toLowerCase() == 'true',
-              deleted: splitedValue[2].toLowerCase() == 'true'));
+            from: splitedKey[0],
+            to: splitedKey[1],
+            word: splitedKey[2],
+            definition: splitedValue[0],
+            storeTimestamp: int.parse(splitedValue[1]),
+            isNew: splitedValue[3].toLowerCase() == 'true',
+            deleted: splitedValue[2].toLowerCase() == 'true'));
       });
 
       if (hw.length > 0) {
@@ -193,7 +194,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   Future<List<HistoryWord>> fetchHistoryWords() async {
     print('fetchHistoryWords');
-    List<HistoryWord> cachedHistoryWords;
+    var cachedHistoryWords = <HistoryWord>[];
+    var originHistoryWords = <HistoryWord>[];
+    var mergedHistoryWords = <HistoryWord>[];
     try {
       cachedHistoryWords = await _loadCache();
     } catch (e) {
@@ -214,11 +217,10 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       Map obj = jsonDecode(Chrome.stringify(r));
       var ts = new DateTime.now().millisecondsSinceEpoch;
 
-      var remoteHistoryWords = <HistoryWord>[];
       obj.forEach((key, value) {
         var splited = key.toString().split('<');
         if (splited.length >= 3) {
-          remoteHistoryWords.add(HistoryWord(
+          originHistoryWords.add(HistoryWord(
               from: splited[0],
               to: splited[1],
               word: splited[2],
@@ -227,10 +229,14 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         }
       });
 
-      if (remoteHistoryWords.length > 0) {
-        print('world! ${remoteHistoryWords.length} @ $ts');
-        await _storeCache(remoteHistoryWords);
-        return remoteHistoryWords;
+      bool irr = isOriginReset(cachedHistoryWords, originHistoryWords);
+
+      print('irr=$irr');
+
+      if (originHistoryWords.length > 0) {
+        print('world! ${originHistoryWords.length} @ $ts');
+        await _storeCache(originHistoryWords);
+        return originHistoryWords;
       } else {
         throw Exception('your word history is empty');
       }
@@ -241,6 +247,25 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       print('Timeout: $e');
       throw Exception('load history words timeout');
     }
+  }
+
+  bool isOriginReset(List<HistoryWord> cachedHistoryWords,
+      List<HistoryWord> originHistoryWords) {
+    var originMap = {};
+    originHistoryWords.forEach((hw) {
+      String k = hw.from + '<' + hw.to + '<' + hw.word;
+      String v = hw.definition +
+          '<' +
+          hw.storeTimestamp.toString() +
+          '<' +
+          (hw.deleted ? 'true' : 'false') +
+          '<' +
+          (hw.isNew ? 'true' : 'false');
+      originMap[k] = v;
+    });
+
+    return cachedHistoryWords
+        .any((hw) => originMap[hw.from + '< ' + hw.to + '<' + hw.word] == null);
   }
 }
 
