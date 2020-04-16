@@ -212,9 +212,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
               new SendMessageMessage(getHistory: true),
               new SendMessageOptions(includeTlsChannelId: false))
           .timeout(const Duration(seconds: 5));
-      print('r=${Chrome.stringify(r)}');
 
-      Map obj = jsonDecode(Chrome.stringify(r));
+      Map obj = Chrome.mapify(r);
       var ts = new DateTime.now().millisecondsSinceEpoch;
 
       obj.forEach((key, value) {
@@ -230,10 +229,29 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       });
 
       bool irr = isOriginReset(cachedHistoryWords, originHistoryWords);
+      print('origin reset? $irr');
+      if (cachedHistoryWords.length > originHistoryWords.length) {
+        print('origin become less');
+        // dialog user for choosing merge or reset
+      } else if (cachedHistoryWords.length < originHistoryWords.length) {
+        print('origin become more');
+        if(irr) {
+          // dialog user for choosing merge or reset
+        } else {
+          // merge directly
+        }
+      } else {
+        print('origin equal cached');
+        if(irr) {
+          // dialog user for choosing merge or reset
+        } else {
+          // pass, cached words is the latest version
+          print('cached is the latest version');
+          mergedHistoryWords = cachedHistoryWords;
+        }
+      }
 
-      print('irr=$irr');
-
-      if (originHistoryWords.length > 0) {
+      if (mergedHistoryWords.length > 0) {
         print('world! ${originHistoryWords.length} @ $ts');
         await _storeCache(originHistoryWords);
         return originHistoryWords;
@@ -264,8 +282,23 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       originMap[k] = v;
     });
 
-    return cachedHistoryWords
-        .any((hw) => originMap[hw.from + '< ' + hw.to + '<' + hw.word] == null);
+    // return cachedHistoryWords
+    //     .any((hw) => originMap[hw.from + '< ' + hw.to + '<' + hw.word] == null);
+
+    bool result = false;
+
+    for (var i = 0; i < cachedHistoryWords.length; i++) {
+      var hw = cachedHistoryWords[i];
+      String k = hw.from + '<' + hw.to + '<' + hw.word;
+      print("hasn't value: ${originMap[k] == null}");
+      if(originMap[k] == null) {
+        result = true;
+        break;
+      } else {
+        continue;
+      }
+    }
+    return result;
   }
 }
 
