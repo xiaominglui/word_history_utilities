@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:convert';
-import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 import '../chrome_extension.dart' as Chrome;
 import '../chrome_extension.dart' show SendMessageOptions;
@@ -235,14 +233,16 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         // dialog user for choosing merge or reset
       } else if (cachedHistoryWords.length < originHistoryWords.length) {
         print('origin become more');
-        if(irr) {
+        if (irr) {
           // dialog user for choosing merge or reset
         } else {
           // merge directly
+          mergeHistoryWords(
+              cachedHistoryWords, originHistoryWords, mergedHistoryWords);
         }
       } else {
         print('origin equal cached');
-        if(irr) {
+        if (irr) {
           // dialog user for choosing merge or reset
         } else {
           // pass, cached words is the latest version
@@ -291,7 +291,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       var hw = cachedHistoryWords[i];
       String k = hw.from + '<' + hw.to + '<' + hw.word;
       print("hasn't value: ${originMap[k] == null}");
-      if(originMap[k] == null) {
+      if (originMap[k] == null) {
         result = true;
         break;
       } else {
@@ -300,6 +300,38 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     }
     return result;
   }
+}
+
+void mergeHistoryWords(
+    List<HistoryWord> cachedHistoryWords,
+    List<HistoryWord> originHistoryWords,
+    List<HistoryWord> mergedHistoryWords) {
+  print('mergeHistoryWords');
+  // word both in cached and origin directly add into merged;
+  var cachedMap = {};
+  cachedHistoryWords.forEach((hw) {
+    String k = hw.from + '<' + hw.to + '<' + hw.word;
+    String v = hw.definition +
+        '<' +
+        hw.storeTimestamp.toString() +
+        '<' +
+        (hw.deleted ? 'true' : 'false') +
+        '<' +
+        (hw.isNew ? 'true' : 'false');
+    cachedMap[k] = v;
+  });
+  originHistoryWords.forEach((hw) {
+    String k = hw.from + '<' + hw.to + '<' + hw.word;
+    if (cachedMap[k] == null) {
+      // word only in orgin
+      hw.isNew = true;
+      hw.deleted = false;
+      mergedHistoryWords.add(hw);
+    } else {
+      // word both in origin and cached
+      mergedHistoryWords.add(hw);
+    }
+  });
 }
 
 class WordHistoryFragment extends StatefulWidget {
