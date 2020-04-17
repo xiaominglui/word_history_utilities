@@ -8,8 +8,12 @@ import '../chrome_extension.dart' as Chrome;
 class AppOptions {
   final bool auto_sync_on_launch;
   final bool auto_add_new_history_word;
+  final bool always_merge;
 
-  AppOptions({this.auto_sync_on_launch, this.auto_add_new_history_word});
+  AppOptions(
+      {this.auto_sync_on_launch,
+      this.auto_add_new_history_word,
+      this.always_merge});
 }
 
 class OptionsFragment extends StatefulWidget {
@@ -20,8 +24,10 @@ class OptionsFragment extends StatefulWidget {
 class _OptionsFragmentState extends State<OptionsFragment> {
   bool cbvAutoSyncBakup;
   bool cbvAutoAddBakup;
+  bool cbvAlwaysMergeBakup;
   bool cbvAutoSync;
   bool cbvAutoAdd;
+  bool cbvAlwaysMerge;
   bool hasChanged = false;
 
   @override
@@ -37,8 +43,10 @@ class _OptionsFragmentState extends State<OptionsFragment> {
     setState(() {
       cbvAutoSync = options.auto_sync_on_launch;
       cbvAutoAdd = options.auto_add_new_history_word;
+      cbvAlwaysMerge = options.always_merge;
       cbvAutoSyncBakup = cbvAutoSync;
       cbvAutoAddBakup = cbvAutoAdd;
+      cbvAlwaysMergeBakup = cbvAlwaysMergeBakup;
     });
   }
 
@@ -51,6 +59,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
     var map = {};
     map['cbvAutoSync'] = o.auto_sync_on_launch;
     map['cbvAutoAdd'] = o.auto_add_new_history_word;
+    map['cbvAlwaysMerge'] = o.always_merge;
     try {
       var jsObj = Chrome.mapToJSObj(map);
       await Chrome.Extension.storageLocalSet(jsObj);
@@ -66,8 +75,9 @@ class _OptionsFragmentState extends State<OptionsFragment> {
       Map map = jsonDecode(Chrome.stringify(res));
 
       var options = AppOptions(
-          auto_add_new_history_word: map['cbvAutoAdd'],
-          auto_sync_on_launch: map['cbvAutoSync']);
+          auto_add_new_history_word: map['cbvAutoAdd'] ?? true,
+          auto_sync_on_launch: map['cbvAutoSync'] ?? true,
+          always_merge: map['cbvAlwaysMerge'] ?? false);
       return options;
     } catch (e) {
       print('Caught e: $e');
@@ -105,6 +115,18 @@ class _OptionsFragmentState extends State<OptionsFragment> {
             },
           )
         ]),
+        Row(children: [
+          Text('Always merge on sync: '),
+          Checkbox(
+            value: cbvAlwaysMerge,
+            onChanged: (value) {
+              setState(() {
+                hasChanged = true;
+                cbvAlwaysMerge = value;
+              });
+            },
+          )
+        ]),
         Row(
           children: <Widget>[
             FlatButton(
@@ -112,7 +134,8 @@ class _OptionsFragmentState extends State<OptionsFragment> {
                     ? () {
                         saveAppOptions(AppOptions(
                             auto_sync_on_launch: cbvAutoSync,
-                            auto_add_new_history_word: cbvAutoAdd));
+                            auto_add_new_history_word: cbvAutoAdd,
+                            always_merge: cbvAlwaysMerge));
                         cbvAutoSyncBakup = cbvAutoSync;
                         cbvAutoAddBakup = cbvAutoAdd;
                         setState(() {
@@ -131,6 +154,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
                         setState(() {
                           cbvAutoAdd = cbvAutoAddBakup;
                           cbvAutoSync = cbvAutoSyncBakup;
+                          cbvAlwaysMerge = cbvAlwaysMergeBakup;
                           hasChanged = false;
                         });
                       }
