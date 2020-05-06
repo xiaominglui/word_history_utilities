@@ -3,6 +3,7 @@ import 'dart:js';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:word_history_utilities/exceptions/UnknownMergeStrategyException.dart';
 import '../chrome_extension.dart' as Chrome;
 import '../chrome_extension.dart' show SendMessageOptions;
 import '../chrome_extension.dart' show SendMessageMessage;
@@ -96,7 +97,11 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
               return CircularProgressIndicator();
             default:
               if (snapshot.hasError) {
-                return Text("${snapshot.error}");
+                if (snapshot.error is UnknownMergeStrategyException) {
+                  _showDialog();
+                } else {
+                  return Text("${snapshot.error}");
+                }
               } else {
                 if (snapshot.hasData) {
                   var dr = snapshot.data
@@ -256,11 +261,13 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       if (cachedHistoryWords.length > originHistoryWords.length) {
         print('origin become less');
         // dialog user for choosing merge or reset
+        throw UnknownMergeStrategyException();
 
       } else if (cachedHistoryWords.length < originHistoryWords.length) {
         print('origin become more');
         if (irr) {
           // dialog user for choosing merge or reset
+          throw UnknownMergeStrategyException();
         } else {
           // merge directly
           mergeHistoryWords(
@@ -270,6 +277,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         print('origin equal cached');
         if (irr) {
           // dialog user for choosing merge or reset
+          throw UnknownMergeStrategyException();
         } else {
           // pass, cached words is the latest version
           print('cached is the latest version');
