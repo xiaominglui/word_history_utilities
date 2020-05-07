@@ -64,19 +64,25 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   @override
   Widget build(BuildContext context) {
-    void _showDialog() {
+    void _showMergeStrategryChooserDialog() {
       // flutter defined function
       showDialog(
         context: context,
         builder: (BuildContext context) {
           // return object of type Dialog
           return AlertDialog(
-            title: new Text("Alert Dialog title"),
-            content: new Text("Alert Dialog body"),
+            title: new Text("Choose a merge strategy"),
+            content: new Text("Detect your Google Dictionary Extension word history reseted after last sync, Press Merge button to keep words synced before, or Reset button to keep same with Google Dictionary Extenstion."),
             actions: <Widget>[
               // usually buttons at the bottom of the dialog
               new FlatButton(
-                child: new Text("Close"),
+                child: new Text("Merge"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              new FlatButton(
+                child: new Text("Reset"),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -98,7 +104,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
             default:
               if (snapshot.hasError) {
                 if (snapshot.error is UnknownMergeStrategyException) {
-                  _showDialog();
+                  _showMergeStrategryChooserDialog();
                 } else {
                   return Text("${snapshot.error}");
                 }
