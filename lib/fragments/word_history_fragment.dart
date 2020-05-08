@@ -54,6 +54,10 @@ class HistoryWord {
 
 class WordHistoryFragmentState extends State<WordHistoryFragment> {
   Future<dynamic> futureWords;
+  var mergeStrategy = -1; // -1 unknown, 1 reset, 0 merge
+
+  var cachedHistoryWordsBackup = <HistoryWord>[];
+  var originHistoryWordsBackup = <HistoryWord>[];
 
   @override
   void initState() {
@@ -72,18 +76,23 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
           // return object of type Dialog
           return AlertDialog(
             title: new Text("Choose a merge strategy"),
-            content: new Text("Detect your Google Dictionary Extension word history reseted after last sync, Press Merge button to keep words synced before, or Reset button to keep same with Google Dictionary Extenstion."),
+            content: new Text(
+                "Detect your Google Dictionary Extension word history reseted after last sync, Press Merge button to keep words synced before, or Reset button to keep same with Google Dictionary Extenstion."),
             actions: <Widget>[
               // usually buttons at the bottom of the dialog
               new FlatButton(
                 child: new Text("Merge"),
                 onPressed: () {
+                  mergeStrategy = 0;
+                  refresh();
                   Navigator.of(context).pop();
                 },
               ),
               new FlatButton(
                 child: new Text("Reset"),
                 onPressed: () {
+                  mergeStrategy = 1;
+                  refresh();
                   Navigator.of(context).pop();
                 },
               ),
@@ -226,6 +235,45 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     }
   }
 
+  void mergeHistoryWords(
+      List<HistoryWord> cachedHistoryWords,
+      List<HistoryWord> originHistoryWords,
+      List<HistoryWord> mergedHistoryWords) {
+    print(
+        'mergeHistoryWords, cached ${cachedHistoryWords.length}; origin ${originHistoryWords.length}');
+    // word only in origin or only in cached directly add into merged;
+    // word both in cached and origin directly add into merged;
+
+    if (originHistoryWords.length > 0) {
+      var cachedMap = {};
+      cachedHistoryWords.forEach((hw) {
+        String k = hw.from + '<' + hw.to + '<' + hw.word;
+        String v = hw.definition +
+            '<' +
+            hw.storeTimestamp.toString() +
+            '<' +
+            (hw.deleted ? 'true' : 'false') +
+            '<' +
+            (hw.isNew ? 'true' : 'false');
+        cachedMap[k] = v;
+      });
+      originHistoryWords.forEach((hw) {
+        String k = hw.from + '<' + hw.to + '<' + hw.word;
+        if (cachedMap[k] == null) {
+          // word only in orgin
+          hw.isNew = true;
+          hw.deleted = false;
+          mergedHistoryWords.add(hw);
+        } else {
+          // word both in origin and cached
+          mergedHistoryWords.add(hw);
+        }
+      });
+    } else {
+      mergedHistoryWords.addAll(cachedHistoryWords);
+    }
+  }
+
   Future<List<HistoryWord>> fetchHistoryWords() async {
     print('fetchHistoryWords');
     var cachedHistoryWords = <HistoryWord>[];
@@ -250,7 +298,10 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       Map obj = Chrome.mapify(r);
       var ts = new DateTime.now().millisecondsSinceEpoch;
 
+      print('objMap: ${obj.length}');
+
       obj.forEach((key, value) {
+        print('handle each');
         var splited = key.toString().split('<');
         if (splited.length >= 3) {
           originHistoryWords.add(HistoryWord(
@@ -262,33 +313,60 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         }
       });
 
+      print('I am here');
       bool irr = isOriginReset(cachedHistoryWords, originHistoryWords);
-      print('origin reset? $irr');
-      if (cachedHistoryWords.length > originHistoryWords.length) {
-        print('origin become less');
-        // dialog user for choosing merge or reset
-        throw UnknownMergeStrategyException();
-
-      } else if (cachedHistoryWords.length < originHistoryWords.length) {
-        print('origin become more');
-        if (irr) {
+      print('I am here again');
+      print('origin reset? $irr; merge strategy is $mergeStrategy');
+      if (mergeStrategy == -1) {
+        if (cachedHistoryWords.length > originHistoryWords.length) {
+          print('origin become less');
           // dialog user for choosing merge or reset
+          cachedHistoryWordsBackup.addAll(cachedHistoryWords);
+          originHistoryWordsBackup.addAll(originHistoryWords);
           throw UnknownMergeStrategyException();
+        } else if (cachedHistoryWords.length < originHistoryWords.length) {
+          print('origin become more');
+          if (irr) {
+            // dialog user for choosing merge or reset
+            cachedHistoryWordsBackup.addAll(cachedHistoryWords);
+            originHistoryWordsBackup.addAll(originHistoryWords);
+            throw UnknownMergeStrategyException();
+          } else {
+            // merge directly
+            mergeHistoryWords(
+                cachedHistoryWords, originHistoryWords, mergedHistoryWords);
+          }
         } else {
-          // merge directly
+          print('origin equal cached');
+          if (irr) {
+            // dialog user for choosing merge or reset
+            cachedHistoryWordsBackup.addAll(cachedHistoryWords);
+            originHistoryWordsBackup.addAll(originHistoryWords);
+            throw UnknownMergeStrategyException();
+          } else {
+            // pass, cached words is the latest version
+            print('cached is the latest version');
+            mergedHistoryWords = cachedHistoryWords;
+          }
+        }
+      } else if (mergeStrategy == 0) {
+        // merge
+        if (originHistoryWordsBackup.length > 0 &&
+            cachedHistoryWordsBackup.length > 0) {
+          mergeHistoryWords(cachedHistoryWordsBackup, originHistoryWordsBackup,
+              mergedHistoryWords);
+          originHistoryWordsBackup.clear();
+          cachedHistoryWordsBackup.clear();
+        } else {
           mergeHistoryWords(
               cachedHistoryWords, originHistoryWords, mergedHistoryWords);
         }
-      } else {
-        print('origin equal cached');
-        if (irr) {
-          // dialog user for choosing merge or reset
-          throw UnknownMergeStrategyException();
-        } else {
-          // pass, cached words is the latest version
-          print('cached is the latest version');
-          mergedHistoryWords = cachedHistoryWords;
-        }
+      } else if (mergeStrategy == 1) {
+        // reset
+        cachedHistoryWordsBackup.clear();
+        cachedHistoryWords.clear();
+        mergeHistoryWords(
+            cachedHistoryWords, originHistoryWords, mergedHistoryWords);
       }
 
       if (mergedHistoryWords.length > 0) {
@@ -309,6 +387,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   bool isOriginReset(List<HistoryWord> cachedHistoryWords,
       List<HistoryWord> originHistoryWords) {
+    print('isOriginReset, cached ${cachedHistoryWords.length}; origin ${originHistoryWords.length}');
     var originMap = {};
     originHistoryWords.forEach((hw) {
       String k = hw.from + '<' + hw.to + '<' + hw.word;
@@ -321,9 +400,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
           (hw.isNew ? 'true' : 'false');
       originMap[k] = v;
     });
-
-    // return cachedHistoryWords
-    //     .any((hw) => originMap[hw.from + '< ' + hw.to + '<' + hw.word] == null);
 
     bool result = false;
 
@@ -340,38 +416,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     }
     return result;
   }
-}
-
-void mergeHistoryWords(
-    List<HistoryWord> cachedHistoryWords,
-    List<HistoryWord> originHistoryWords,
-    List<HistoryWord> mergedHistoryWords) {
-  print('mergeHistoryWords');
-  // word both in cached and origin directly add into merged;
-  var cachedMap = {};
-  cachedHistoryWords.forEach((hw) {
-    String k = hw.from + '<' + hw.to + '<' + hw.word;
-    String v = hw.definition +
-        '<' +
-        hw.storeTimestamp.toString() +
-        '<' +
-        (hw.deleted ? 'true' : 'false') +
-        '<' +
-        (hw.isNew ? 'true' : 'false');
-    cachedMap[k] = v;
-  });
-  originHistoryWords.forEach((hw) {
-    String k = hw.from + '<' + hw.to + '<' + hw.word;
-    if (cachedMap[k] == null) {
-      // word only in orgin
-      hw.isNew = true;
-      hw.deleted = false;
-      mergedHistoryWords.add(hw);
-    } else {
-      // word both in origin and cached
-      mergedHistoryWords.add(hw);
-    }
-  });
 }
 
 class WordHistoryFragment extends StatefulWidget {
