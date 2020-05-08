@@ -231,7 +231,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       }
     } catch (e) {
       print('loadCache Caught e: $e');
-      throw Exception('load error');
+      throw Exception('load cache error');
     }
   }
 
@@ -245,30 +245,58 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     // word both in cached and origin directly add into merged;
 
     if (originHistoryWords.length > 0) {
-      var cachedMap = {};
-      cachedHistoryWords.forEach((hw) {
-        String k = hw.from + '<' + hw.to + '<' + hw.word;
-        String v = hw.definition +
-            '<' +
-            hw.storeTimestamp.toString() +
-            '<' +
-            (hw.deleted ? 'true' : 'false') +
-            '<' +
-            (hw.isNew ? 'true' : 'false');
-        cachedMap[k] = v;
-      });
-      originHistoryWords.forEach((hw) {
-        String k = hw.from + '<' + hw.to + '<' + hw.word;
-        if (cachedMap[k] == null) {
-          // word only in orgin
-          hw.isNew = true;
-          hw.deleted = false;
-          mergedHistoryWords.add(hw);
-        } else {
-          // word both in origin and cached
-          mergedHistoryWords.add(hw);
-        }
-      });
+      if (cachedHistoryWords.length > originHistoryWords.length) {
+        var originMap = {};
+        originHistoryWords.forEach((hw) {
+          String k = hw.from + '<' + hw.to + '<' + hw.word;
+          String v = hw.definition +
+              '<' +
+              hw.storeTimestamp.toString() +
+              '<' +
+              (hw.deleted ? 'true' : 'false') +
+              '<' +
+              (hw.isNew ? 'true' : 'false');
+          originMap[k] = v;
+        });
+
+        cachedHistoryWords.forEach((hw) {
+          String k = hw.from + '<' + hw.to + '<' + hw.word;
+          if (originMap[k] == null) {
+            // word only in cache
+            mergedHistoryWords.add(hw);
+          } else {
+            // word both in origin and cached
+            mergedHistoryWords.add(hw);
+          }
+          // word only in origin be pass TODO
+        });
+
+      } else {
+        var cachedMap = {};
+        cachedHistoryWords.forEach((hw) {
+          String k = hw.from + '<' + hw.to + '<' + hw.word;
+          String v = hw.definition +
+              '<' +
+              hw.storeTimestamp.toString() +
+              '<' +
+              (hw.deleted ? 'true' : 'false') +
+              '<' +
+              (hw.isNew ? 'true' : 'false');
+          cachedMap[k] = v;
+        });
+        originHistoryWords.forEach((hw) {
+          String k = hw.from + '<' + hw.to + '<' + hw.word;
+          if (cachedMap[k] == null) {
+            // word only in orgin
+            hw.isNew = true;
+            hw.deleted = false;
+            mergedHistoryWords.add(hw);
+          } else {
+            // word both in origin and cached
+            mergedHistoryWords.add(hw);
+          }
+        });
+      }
     } else {
       mergedHistoryWords.addAll(cachedHistoryWords);
     }
@@ -283,7 +311,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       cachedHistoryWords = await _loadCache();
     } catch (e) {
       print('err: $e');
-      cachedHistoryWords = null;
     }
 
     try {
@@ -349,30 +376,37 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
             mergedHistoryWords = cachedHistoryWords;
           }
         }
-      } else if (mergeStrategy == 0) {
-        // merge
-        if (originHistoryWordsBackup.length > 0 &&
-            cachedHistoryWordsBackup.length > 0) {
-          mergeHistoryWords(cachedHistoryWordsBackup, originHistoryWordsBackup,
-              mergedHistoryWords);
-          originHistoryWordsBackup.clear();
+      } else {
+        if (mergeStrategy == 0) {
+          mergeStrategy = -1;
+          // merge
+          if (originHistoryWordsBackup.length > 0 &&
+              cachedHistoryWordsBackup.length > 0) {
+            print(
+                'cb: ${cachedHistoryWordsBackup.length}; ob: ${originHistoryWordsBackup.length}');
+            mergeHistoryWords(cachedHistoryWordsBackup,
+                originHistoryWordsBackup, mergedHistoryWords);
+            originHistoryWordsBackup.clear();
+            cachedHistoryWordsBackup.clear();
+          } else {
+            mergeHistoryWords(
+                cachedHistoryWords, originHistoryWords, mergedHistoryWords);
+          }
+        } else if (mergeStrategy == 1) {
+          // reset
+          mergeStrategy = -1;
           cachedHistoryWordsBackup.clear();
-        } else {
+          cachedHistoryWords.clear();
           mergeHistoryWords(
               cachedHistoryWords, originHistoryWords, mergedHistoryWords);
         }
-      } else if (mergeStrategy == 1) {
-        // reset
-        cachedHistoryWordsBackup.clear();
-        cachedHistoryWords.clear();
-        mergeHistoryWords(
-            cachedHistoryWords, originHistoryWords, mergedHistoryWords);
       }
+
+      await _storeCache(mergedHistoryWords);
 
       if (mergedHistoryWords.length > 0) {
         print('world! ${originHistoryWords.length} @ $ts');
-        await _storeCache(originHistoryWords);
-        return originHistoryWords;
+        return mergedHistoryWords;
       } else {
         throw Exception('your word history is empty');
       }
@@ -387,7 +421,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   bool isOriginReset(List<HistoryWord> cachedHistoryWords,
       List<HistoryWord> originHistoryWords) {
-    print('isOriginReset, cached ${cachedHistoryWords.length}; origin ${originHistoryWords.length}');
+    print('isOriginReset');
+    print(
+        'isOriginReset, cached ${cachedHistoryWords.length}; origin ${originHistoryWords.length}');
     var originMap = {};
     originHistoryWords.forEach((hw) {
       String k = hw.from + '<' + hw.to + '<' + hw.word;
@@ -406,7 +442,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     for (var i = 0; i < cachedHistoryWords.length; i++) {
       var hw = cachedHistoryWords[i];
       String k = hw.from + '<' + hw.to + '<' + hw.word;
-      print("hasn't value: ${originMap[k] == null}");
+      print("origin hasn't value in cached: ${originMap[k] == null}");
       if (originMap[k] == null) {
         result = true;
         break;
