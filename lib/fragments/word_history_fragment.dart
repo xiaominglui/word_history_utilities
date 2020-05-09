@@ -247,9 +247,25 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       });
     }
 
+    var cachedMap = {};
+    cachedHistoryWords.forEach((hw) {
+      String k = hw.from + '<' + hw.to + '<' + hw.word;
+      String v = hw.definition +
+          '<' +
+          hw.storeTimestamp.toString() +
+          '<' +
+          (hw.deleted ? 'true' : 'false') +
+          '<' +
+          (hw.isNew ? 'true' : 'false');
+      cachedMap[k] = v;
+    });
+
     if (originHistoryWords.length > 0) {
       originHistoryWords.forEach((hw) {
-        mergedHistoryWords.add(hw);
+        String k = hw.from + '<' + hw.to + '<' + hw.word;
+        if (cachedMap[k] == null) {
+          mergedHistoryWords.add(hw);
+        }
       });
     }
     originHistoryWordsBackup.clear();
