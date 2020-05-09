@@ -71,7 +71,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
   Future<AppOptions> getAppOptions() async {
     try {
       final res = await Chrome.Extension.storageLocalGet(null);
-      print(Chrome.stringify(res));
+      // print(Chrome.stringify(res));
       Map map = jsonDecode(Chrome.stringify(res));
 
       var options = AppOptions(

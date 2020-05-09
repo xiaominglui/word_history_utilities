@@ -3,6 +3,7 @@ import 'dart:js';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:json_annotation/json_annotation.dart';
+import 'dart:convert';
 import 'package:word_history_utilities/exceptions/UnknownMergeStrategyException.dart';
 import '../chrome_extension.dart' as Chrome;
 import '../chrome_extension.dart' show SendMessageOptions;
@@ -54,7 +55,7 @@ class HistoryWord {
 
 class WordHistoryFragmentState extends State<WordHistoryFragment> {
   Future<dynamic> futureWords;
-  var mergeStrategy = -1; // -1 unknown, 1 reset, 0 merge
+  var mergeStrategy; // -1 unknown, 1 reset, 0 merge, null init
 
   var cachedHistoryWordsBackup = <HistoryWord>[];
   var originHistoryWordsBackup = <HistoryWord>[];
@@ -274,6 +275,23 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   Future<List<HistoryWord>> fetchHistoryWords() async {
     print('fetchHistoryWords');
+
+    if (mergeStrategy == null) {
+      try {
+        final resOptions = await Chrome.Extension.storageLocalGet(null);
+        print(Chrome.stringify(resOptions));
+        Map map = jsonDecode(Chrome.stringify(resOptions));
+        if (map['cbvAlwaysMerge'] == true) {
+          mergeStrategy = 0;
+        } else {
+          mergeStrategy = -1;
+        }
+        print('mergeStrategy init: $mergeStrategy');
+      } catch (e) {
+        print('err on load options: $e');
+      }
+    }
+
     var cachedHistoryWords = <HistoryWord>[];
     var originHistoryWords = <HistoryWord>[];
     var mergedHistoryWords = <HistoryWord>[];
