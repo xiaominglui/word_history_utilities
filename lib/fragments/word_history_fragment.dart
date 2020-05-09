@@ -241,65 +241,19 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       List<HistoryWord> mergedHistoryWords) {
     print(
         'mergeHistoryWords, cached ${cachedHistoryWords.length}; origin ${originHistoryWords.length}');
-    // word only in origin or only in cached directly add into merged;
-    // word both in cached and origin directly add into merged;
+    if (cachedHistoryWords.length > 0) {
+      cachedHistoryWords.forEach((hw) {
+        mergedHistoryWords.add(hw);
+      });
+    }
 
     if (originHistoryWords.length > 0) {
-      if (cachedHistoryWords.length > originHistoryWords.length) {
-        var originMap = {};
-        originHistoryWords.forEach((hw) {
-          String k = hw.from + '<' + hw.to + '<' + hw.word;
-          String v = hw.definition +
-              '<' +
-              hw.storeTimestamp.toString() +
-              '<' +
-              (hw.deleted ? 'true' : 'false') +
-              '<' +
-              (hw.isNew ? 'true' : 'false');
-          originMap[k] = v;
-        });
-
-        cachedHistoryWords.forEach((hw) {
-          String k = hw.from + '<' + hw.to + '<' + hw.word;
-          if (originMap[k] == null) {
-            // word only in cache
-            mergedHistoryWords.add(hw);
-          } else {
-            // word both in origin and cached
-            mergedHistoryWords.add(hw);
-          }
-          // word only in origin be pass TODO
-        });
-
-      } else {
-        var cachedMap = {};
-        cachedHistoryWords.forEach((hw) {
-          String k = hw.from + '<' + hw.to + '<' + hw.word;
-          String v = hw.definition +
-              '<' +
-              hw.storeTimestamp.toString() +
-              '<' +
-              (hw.deleted ? 'true' : 'false') +
-              '<' +
-              (hw.isNew ? 'true' : 'false');
-          cachedMap[k] = v;
-        });
-        originHistoryWords.forEach((hw) {
-          String k = hw.from + '<' + hw.to + '<' + hw.word;
-          if (cachedMap[k] == null) {
-            // word only in orgin
-            hw.isNew = true;
-            hw.deleted = false;
-            mergedHistoryWords.add(hw);
-          } else {
-            // word both in origin and cached
-            mergedHistoryWords.add(hw);
-          }
-        });
-      }
-    } else {
-      mergedHistoryWords.addAll(cachedHistoryWords);
+      originHistoryWords.forEach((hw) {
+        mergedHistoryWords.add(hw);
+      });
     }
+    originHistoryWordsBackup.clear();
+    cachedHistoryWordsBackup.clear();
   }
 
   Future<List<HistoryWord>> fetchHistoryWords() async {
