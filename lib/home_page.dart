@@ -12,7 +12,8 @@ class HomePage extends StatefulWidget {
   final drawerItems = [
     new DrawerItem("Word History", Icons.map),
     new DrawerItem("Options", Icons.star),
-    new DrawerItem("Iniciar Sesion", Icons.lock)
+    new DrawerItem("Privacy", Icons.lock),
+    new DrawerItem("Help", Icons.help)
   ];
 
   @override
@@ -85,7 +86,7 @@ class HomePageState extends State<HomePage> {
         child: new Column(
           children: <Widget>[
             new UserAccountsDrawerHeader(
-                accountName: new Text("TURISMO BOLIVIA"), accountEmail: null),
+                accountName: new Text("Utils for Word History of Google Dictionary Extension"), accountEmail: null),
             new Column(children: drawerOptions)
           ],
         ),
