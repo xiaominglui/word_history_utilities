@@ -86,7 +86,7 @@ class HomePageState extends State<HomePage> {
         child: new Column(
           children: <Widget>[
             new UserAccountsDrawerHeader(
-                accountName: new Text("Utilities for Word History of Google Dictionary Extension",softWrap: true,), accountEmail: null),
+                accountName: new Text("Utilities for Word History of Google Dictionary Extension"), accountEmail: null),
             new Column(children: drawerOptions)
           ],
         ),

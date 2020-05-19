@@ -60,6 +60,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
   var cachedHistoryWordsBackup = <HistoryWord>[];
   var originHistoryWordsBackup = <HistoryWord>[];
 
+  bool sortWord = true;
+
   @override
   void initState() {
     super.initState();
@@ -120,6 +122,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                 }
               } else {
                 if (snapshot.hasData) {
+                  snapshot.data.sort((a, b) => b.word.compareTo(a.word));
                   var dr = snapshot.data
                       .map((val) => DataRow(cells: [
                             DataCell(Text(val.from)),
@@ -148,13 +151,24 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                         child: ListView(
                           padding: const EdgeInsets.all(16),
                           children: [
-                            DataTable(columns: [
-                              DataColumn(label: Text('from')),
-                              DataColumn(label: Text('to')),
-                              DataColumn(label: Text('word')),
-                              DataColumn(label: Text('definition')),
-                              DataColumn(label: Text('remark')),
-                            ], rows: dr),
+                            DataTable(
+                                sortAscending: sortWord,
+                                sortColumnIndex: 2,
+                                columns: [
+                                  DataColumn(label: Text('from')),
+                                  DataColumn(label: Text('to')),
+                                  DataColumn(
+                                      onSort: (columnIndex, ascending) {
+                                        setState(() {
+                                          sortWord = !sortWord;
+                                        });
+                                      },
+                                      numeric: false,
+                                      label: Text('word')),
+                                  DataColumn(label: Text('definition')),
+                                  DataColumn(label: Text('remark')),
+                                ],
+                                rows: dr),
                           ],
                         ),
                       )
