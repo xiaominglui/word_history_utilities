@@ -122,7 +122,12 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                 }
               } else {
                 if (snapshot.hasData) {
-                  snapshot.data.sort((a, b) => b.word.compareTo(a.word));
+                  if (sortWord) {
+                    snapshot.data.sort((a, b) => b.word.compareTo(a.word));
+                  } else {
+                    snapshot.data.sort((a, b) => a.word.compareTo(b.word));
+                  }
+
                   var dr = snapshot.data
                       .map((val) => DataRow(cells: [
                             DataCell(Text(val.from)),
