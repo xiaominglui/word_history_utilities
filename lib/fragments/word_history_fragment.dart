@@ -60,7 +60,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
   var cachedHistoryWordsBackup = <HistoryWord>[];
   var originHistoryWordsBackup = <HistoryWord>[];
 
-  bool sortWord = true;
+  bool sortWord = false;
 
   @override
   void initState() {
@@ -130,10 +130,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
                   var dr = snapshot.data
                       .map((val) => DataRow(cells: [
-                            DataCell(Text(val.from)),
-                            DataCell(Text(val.to)),
-                            DataCell(Text(val.word)),
-                            DataCell(Text(val.definition)),
                             DataCell(FlatButton(
                                 onPressed: () {
                                   Navigator.push(context,
@@ -142,6 +138,10 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                   }));
                                 },
                                 child: Text('Button'))),
+                            DataCell(Text(val.from)),
+                            DataCell(Text(val.to)),
+                            DataCell(Text(val.word)),
+                            DataCell(Text(val.definition)),
                           ]))
                       .toList();
                   // String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
@@ -158,8 +158,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                           children: [
                             DataTable(
                                 sortAscending: sortWord,
-                                sortColumnIndex: 2,
+                                sortColumnIndex: 3,
                                 columns: [
+                                  DataColumn(label: Text('remark')),
                                   DataColumn(label: Text('from')),
                                   DataColumn(label: Text('to')),
                                   DataColumn(
@@ -171,7 +172,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                       numeric: false,
                                       label: Text('word')),
                                   DataColumn(label: Text('definition')),
-                                  DataColumn(label: Text('remark')),
                                 ],
                                 rows: dr),
                           ],
