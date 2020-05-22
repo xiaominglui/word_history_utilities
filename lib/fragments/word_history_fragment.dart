@@ -129,20 +129,24 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                   }
 
                   var dr = snapshot.data
-                      .map((val) => DataRow(cells: [
-                            DataCell(FlatButton(
-                                onPressed: () {
-                                  Navigator.push(context,
-                                      MaterialPageRoute(builder: (_) {
-                                    return DetailScreen();
-                                  }));
-                                },
-                                child: Text('Button'))),
-                            DataCell(Text(val.from)),
-                            DataCell(Text(val.to)),
-                            DataCell(Text(val.word)),
-                            DataCell(Text(val.definition)),
-                          ]))
+                      .map((val) => DataRow(
+                              onSelectChanged: (newValue) {
+                                print('row 1 pressed');
+                              },
+                              cells: [
+                                DataCell(FlatButton(
+                                    onPressed: () {
+                                      Navigator.push(context,
+                                          MaterialPageRoute(builder: (_) {
+                                        return DetailScreen();
+                                      }));
+                                    },
+                                    child: Text('Button'))),
+                                DataCell(Text(val.from)),
+                                DataCell(Text(val.to)),
+                                DataCell(Text(val.word)),
+                                DataCell(Text(val.definition)),
+                              ]))
                       .toList();
                   // String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
                   //     .format(DateTime.fromMillisecondsSinceEpoch(
@@ -159,6 +163,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                             DataTable(
                                 sortAscending: sortWord,
                                 sortColumnIndex: 3,
+                                showCheckboxColumn: true,
                                 columns: [
                                   DataColumn(label: Text('remark')),
                                   DataColumn(label: Text('from')),
