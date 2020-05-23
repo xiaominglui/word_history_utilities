@@ -47,7 +47,7 @@ class HistoryWord {
       this.storeTimestamp,
       this.isNew,
       this.deleted,
-      this.selected});
+      this.selected = false});
 
   factory HistoryWord.fromJson(Map<String, dynamic> json) =>
       _$HistoryWordFromJson(json);
