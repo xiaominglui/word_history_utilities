@@ -37,6 +37,7 @@ class HistoryWord {
   final int storeTimestamp;
   bool isNew = true;
   bool deleted = false;
+  bool selected = false;
 
   HistoryWord(
       {this.from,
@@ -45,7 +46,8 @@ class HistoryWord {
       this.definition,
       this.storeTimestamp,
       this.isNew,
-      this.deleted});
+      this.deleted,
+      this.selected});
 
   factory HistoryWord.fromJson(Map<String, dynamic> json) =>
       _$HistoryWordFromJson(json);
@@ -128,26 +130,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                     snapshot.data.sort((a, b) => a.word.compareTo(b.word));
                   }
 
-                  var dr = snapshot.data
-                      .map((val) => DataRow(
-                              onSelectChanged: (newValue) {
-                                print('row 1 pressed');
-                              },
-                              cells: [
-                                DataCell(FlatButton(
-                                    onPressed: () {
-                                      Navigator.push(context,
-                                          MaterialPageRoute(builder: (_) {
-                                        return DetailScreen();
-                                      }));
-                                    },
-                                    child: Text('Button'))),
-                                DataCell(Text(val.from)),
-                                DataCell(Text(val.to)),
-                                DataCell(Text(val.word)),
-                                DataCell(Text(val.definition)),
-                              ]))
-                      .toList();
                   // String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
                   //     .format(DateTime.fromMillisecondsSinceEpoch(
                   //         snapshot.data.timestamp));
@@ -165,7 +147,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                 sortColumnIndex: 3,
                                 showCheckboxColumn: true,
                                 columns: [
-                                  DataColumn(label: Text('remark')),
                                   DataColumn(label: Text('from')),
                                   DataColumn(label: Text('to')),
                                   DataColumn(
@@ -178,7 +159,35 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                       label: Text('word')),
                                   DataColumn(label: Text('definition')),
                                 ],
-                                rows: dr),
+                                rows: _buildRows(snapshot.data?.length ?? 0,
+                                    (int index) {
+                                  final HistoryWord h = snapshot.data[index];
+                                  return DataRow.byIndex(
+                                      index: index,
+                                      selected: h.selected,
+                                      onSelectChanged: (bool value) {
+                                        if (h.selected != value) {
+                                          setState(() {
+                                            h.selected= value;
+                                          });
+                                        }
+                                      },
+                                      cells: [
+                                        // DataCell(FlatButton(
+                                        //     onPressed: () {
+                                        //       Navigator.push(context,
+                                        //           MaterialPageRoute(
+                                        //               builder: (_) {
+                                        //         return DetailScreen();
+                                        //       }));
+                                        //     },
+                                        //     child: Text('Button'))),
+                                        DataCell(Text(h.from)),
+                                        DataCell(Text(h.to)),
+                                        DataCell(Text(h.word)),
+                                        DataCell(Text(h.definition)),
+                                      ]);
+                                })),
                           ],
                         ),
                       )
@@ -192,6 +201,16 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         },
       ),
     );
+  }
+
+  static List<DataRow> _buildRows(int count, dataRowbuilder) {
+    List<DataRow> _rows = [];
+
+    for (int i = 0; i < count; i++) {
+      _rows.add(dataRowbuilder(i));
+    }
+
+    return _rows;
   }
 
   void refresh() {
