@@ -146,6 +146,13 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                 sortAscending: sortWord,
                                 sortColumnIndex: 3,
                                 showCheckboxColumn: true,
+                                onSelectAll: (bool value) {
+                                  for (var row in snapshot.data) {
+                                    setState(() {
+                                      row.selected = value;
+                                    });
+                                  }
+                                },
                                 columns: [
                                   DataColumn(label: Text('from')),
                                   DataColumn(label: Text('to')),
