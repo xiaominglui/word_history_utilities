@@ -73,6 +73,28 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
+    final List<Widget> headerWidgets = <Widget>[];
+    double startPadding = 24.0;
+
+    final selectedActions = <Widget>[
+      IconButton(
+        icon: Icon(Icons.delete),
+        onPressed: () {
+          // setState(() {
+          //   for (var item in _items
+          //       ?.where((d) => d?.selected ?? false)
+          //       ?.toSet()
+          //       ?.toList()) {
+          //     _items.remove(item);
+          //   }
+          // });
+        },
+      ),
+    ];
+
     void _showMergeStrategryChooserDialog() {
       // flutter defined function
       showDialog(
@@ -111,6 +133,42 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       child: FutureBuilder<List<HistoryWord>>(
         future: futureWords,
         builder: (context, snapshot) {
+          int _selectedRowCount = snapshot.data
+                  .where((element) => element.selected ?? false)
+                  .toSet()
+                  .toList()
+                  .length ??
+              0;
+
+          if (_selectedRowCount == 0) {
+            headerWidgets.add(Expanded(child: const Text('Data Management')));
+            // if (header is ButtonBar) {
+            //   // We adjust the padding when a button bar is present, because the
+            //   // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
+            //   // around each button on each side, and the button itself will have 8
+            //   // pixels internally on each side, yet we want the left edge of the
+            //   // inside of the button to line up with the 24.0 left inset.
+            //   // Better magic. See https://github.com/flutter/flutter/issues/4460
+            //   startPadding = 12.0;
+            // }
+          } else {
+            headerWidgets.add(Expanded(
+              child:
+                  Text(localizations.selectedRowCountTitle(_selectedRowCount)),
+            ));
+          }
+
+          if (_selectedRowCount != 0) {
+            headerWidgets.addAll(selectedActions.map<Widget>((Widget action) {
+              return Padding(
+                // 8.0 is the default padding of an icon button
+                padding:
+                    const EdgeInsetsDirectional.only(start: 24.0 - 8.0 * 2.0),
+                child: action,
+              );
+            }).toList());
+          }
+
           switch (snapshot.connectionState) {
             case ConnectionState.none:
             case ConnectionState.waiting:
@@ -135,6 +193,34 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                   //         snapshot.data.timestamp));
                   return Scrollbar(
                     child: Column(children: [
+                      Semantics(
+                        container: true,
+                        child: DefaultTextStyle(
+                          style: _selectedRowCount > 0
+                              ? themeData.textTheme.subhead
+                                  .copyWith(color: themeData.accentColor)
+                              : themeData.textTheme.title
+                                  .copyWith(fontWeight: FontWeight.w400),
+                          child: IconTheme.merge(
+                              data: const IconThemeData(opacity: 0.54),
+                              child: ButtonTheme.bar(
+                                child: Ink(
+                                  height: 64.0,
+                                  color: _selectedRowCount > 0
+                                      ? themeData.secondaryHeaderColor
+                                      : null,
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.only(
+                                        start: startPadding, end: 14.0),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: headerWidgets),
+                                  ),
+                                ),
+                              )),
+                        ),
+                      ),
                       Align(
                           alignment: Alignment.topRight,
                           child: Text('number: ${snapshot.data.length}')),
@@ -175,7 +261,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                       onSelectChanged: (bool value) {
                                         if (h.selected != value) {
                                           setState(() {
-                                            h.selected= value;
+                                            h.selected = value;
                                           });
                                         }
                                       },
