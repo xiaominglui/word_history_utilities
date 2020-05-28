@@ -79,22 +79,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     final List<Widget> headerWidgets = <Widget>[];
     double startPadding = 24.0;
 
-    final selectedActions = <Widget>[
-      IconButton(
-        icon: Icon(Icons.delete),
-        onPressed: () {
-          // setState(() {
-          //   for (var item in _items
-          //       ?.where((d) => d?.selected ?? false)
-          //       ?.toSet()
-          //       ?.toList()) {
-          //     _items.remove(item);
-          //   }
-          // });
-        },
-      ),
-    ];
-
     void _showMergeStrategryChooserDialog() {
       // flutter defined function
       showDialog(
@@ -139,6 +123,22 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                   .toList()
                   .length ??
               0;
+
+          final selectedActions = <Widget>[
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                // setState(() {
+                //   for (var item in _items
+                //       ?.where((d) => d?.selected ?? false)
+                //       ?.toSet()
+                //       ?.toList()) {
+                //     _items.remove(item);
+                //   }
+                // });
+              },
+            ),
+          ];
 
           if (_selectedRowCount == 0) {
             headerWidgets.add(Expanded(child: const Text('Data Management')));
