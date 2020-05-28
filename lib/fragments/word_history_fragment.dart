@@ -128,14 +128,15 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
             IconButton(
               icon: Icon(Icons.delete),
               onPressed: () {
-                // setState(() {
-                //   for (var item in _items
-                //       ?.where((d) => d?.selected ?? false)
-                //       ?.toSet()
-                //       ?.toList()) {
-                //     _items.remove(item);
-                //   }
-                // });
+                setState(() {
+                  for (var item in snapshot.data
+                      ?.where((d) => d?.selected ?? false)
+                      ?.toSet()
+                      ?.toList()) {
+                    item.deleted = true;
+                    item.selected = false;
+                  }
+                });
               },
             ),
           ];
@@ -188,6 +189,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                     snapshot.data.sort((a, b) => a.word.compareTo(b.word));
                   }
 
+                  var wordsToShow =
+                      snapshot.data.where((hw) => !hw.deleted).toList();
+
                   // String formattedDate = DateFormat('yyyy-MM-dd – kk:mm')
                   //     .format(DateTime.fromMillisecondsSinceEpoch(
                   //         snapshot.data.timestamp));
@@ -223,7 +227,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                       ),
                       Align(
                           alignment: Alignment.topRight,
-                          child: Text('number: ${snapshot.data.length}')),
+                          child: Text('number: ${wordsToShow.length}')),
                       Expanded(
                         child: ListView(
                           padding: const EdgeInsets.all(16),
@@ -235,7 +239,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                 onSelectAll: (bool value) {
                                   for (var row in snapshot.data) {
                                     setState(() {
-                                      row.selected = value;
+                                      if (!row.deleted) {
+                                        row.selected = value;
+                                      }
                                     });
                                   }
                                 },
@@ -252,9 +258,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                       label: Text('word')),
                                   DataColumn(label: Text('definition')),
                                 ],
-                                rows: _buildRows(snapshot.data?.length ?? 0,
+                                rows: _buildRows(wordsToShow?.length ?? 0,
                                     (int index) {
-                                  final HistoryWord h = snapshot.data[index];
+                                  final HistoryWord h = wordsToShow[index];
                                   return DataRow.byIndex(
                                       index: index,
                                       selected: h.selected,
@@ -266,15 +272,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                         }
                                       },
                                       cells: [
-                                        // DataCell(FlatButton(
-                                        //     onPressed: () {
-                                        //       Navigator.push(context,
-                                        //           MaterialPageRoute(
-                                        //               builder: (_) {
-                                        //         return DetailScreen();
-                                        //       }));
-                                        //     },
-                                        //     child: Text('Button'))),
                                         DataCell(Text(h.from)),
                                         DataCell(Text(h.to)),
                                         DataCell(Text(h.word)),
