@@ -128,11 +128,31 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
             IconButton(
               icon: Icon(Icons.delete),
               onPressed: () {
+                var selected = snapshot.data
+                    ?.where((d) => d?.selected ?? false)
+                    ?.toSet()
+                    ?.toList();
+                final snackBar = SnackBar(
+                    content: Text(selected.length > 1
+                        ? 'Remove ${selected.length} words'
+                        : 'Remove ${selected.length} word'),
+                    action: SnackBarAction(
+                        label: 'Undo',
+                        onPressed: () {
+                          setState(() {
+                            for (var item in selected) {
+                              item.deleted = false;
+                            }
+                          });
+                        }));
+                Scaffold.of(context)
+                    .showSnackBar(snackBar)
+                    .closed
+                    .then((reason) {
+                  print('reason: $reason');
+                });
                 setState(() {
-                  for (var item in snapshot.data
-                      ?.where((d) => d?.selected ?? false)
-                      ?.toSet()
-                      ?.toList()) {
+                  for (var item in selected) {
                     item.deleted = true;
                     item.selected = false;
                   }
