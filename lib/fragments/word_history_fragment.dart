@@ -149,7 +149,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                     .showSnackBar(snackBar)
                     .closed
                     .then((reason) {
-                  print('reason: $reason');
+                  print('snackbar dismiss: $reason');
+                  _storeCache(snapshot.data);
                 });
                 setState(() {
                   for (var item in selected) {
