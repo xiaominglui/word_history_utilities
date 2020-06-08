@@ -64,6 +64,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   bool sortWord = false;
 
+  var syncTimestramp;
+
+
   @override
   void initState() {
     super.initState();
@@ -163,7 +166,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
           ];
 
           if (_selectedRowCount == 0) {
-            headerWidgets.add(Expanded(child: const Text('Data Management')));
+            // headerWidgets.add(Expanded(child: const Text('Data Management')));
             // if (header is ButtonBar) {
             //   // We adjust the padding when a button bar is present, because the
             //   // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
@@ -248,7 +251,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                       ),
                       Align(
                           alignment: Alignment.topRight,
-                          child: Text('number: ${wordsToShow.length}')),
+                          child: Text('number: ${wordsToShow.length}; at $syncTimestramp')),
                       Expanded(
                         child: ListView(
                           padding: const EdgeInsets.all(16),
@@ -267,8 +270,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                   }
                                 },
                                 columns: [
-                                  DataColumn(label: Text('from')),
-                                  DataColumn(label: Text('to')),
                                   DataColumn(
                                       onSort: (columnIndex, ascending) {
                                         setState(() {
@@ -278,6 +279,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                       numeric: false,
                                       label: Text('word')),
                                   DataColumn(label: Text('definition')),
+                                  DataColumn(label: Text('from')),
+                                  DataColumn(label: Text('to')),
                                 ],
                                 rows: _buildRows(wordsToShow?.length ?? 0,
                                     (int index) {
@@ -293,10 +296,10 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                         }
                                       },
                                       cells: [
-                                        DataCell(Text(h.from)),
-                                        DataCell(Text(h.to)),
                                         DataCell(Text(h.word)),
                                         DataCell(Text(h.definition)),
+                                        DataCell(Text(h.from)),
+                                        DataCell(Text(h.to)),
                                       ]);
                                 })),
                           ],
@@ -466,6 +469,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
       Map obj = Chrome.mapify(r);
       var ts = new DateTime.now().millisecondsSinceEpoch;
+      syncTimestramp = ts;
 
       print('objMap: ${obj.length}');
 
