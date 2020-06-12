@@ -8,6 +8,7 @@ import 'package:word_history_utilities/exceptions/UnknownMergeStrategyException.
 import '../chrome_extension.dart' as Chrome;
 import '../chrome_extension.dart' show SendMessageOptions;
 import '../chrome_extension.dart' show SendMessageMessage;
+import 'package:timeago/timeago.dart' as timeago;
 part 'word_history_fragment.g.dart';
 
 class DetailScreen extends StatelessWidget {
@@ -64,7 +65,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   bool sortWord = false;
 
-  var syncTimestramp;
+  int syncTimestramp;
 
 
   @override
@@ -251,7 +252,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                       ),
                       Align(
                           alignment: Alignment.topRight,
-                          child: Text('number: ${wordsToShow.length}; at $syncTimestramp')),
+                          child: Text('number: ${wordsToShow.length}; sync at ${timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp))}')),
                       Expanded(
                         child: ListView(
                           padding: const EdgeInsets.all(16),
