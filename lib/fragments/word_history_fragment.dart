@@ -67,7 +67,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   int syncTimestramp;
 
-
   @override
   void initState() {
     super.initState();
@@ -251,8 +250,12 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                         ),
                       ),
                       Align(
-                          alignment: Alignment.topRight,
-                          child: Text('number: ${wordsToShow.length}; sync at ${timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp))}')),
+                        alignment: Alignment.topRight,
+                        child: Container(
+                            margin: const EdgeInsets.all(16),
+                            child: Text(
+                                'number: ${wordsToShow.length}; sync at ${timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp))}')),
+                      ),
                       Expanded(
                         child: ListView(
                           padding: const EdgeInsets.all(16),
