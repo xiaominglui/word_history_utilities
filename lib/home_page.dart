@@ -46,7 +46,7 @@ class HomePageState extends State<HomePage> {
             icon: const Icon(Icons.sync),
             tooltip: 'Sync history words',
             onPressed: () {
-              _wordHistoryFragmentState.currentState.refresh();
+              _wordHistoryFragmentState.currentState.refresh(true);
             },
           )
         ];

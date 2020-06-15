@@ -59,6 +59,7 @@ class HistoryWord {
 class WordHistoryFragmentState extends State<WordHistoryFragment> {
   Future<dynamic> futureWords;
   var mergeStrategy; // -1 unknown, 1 reset, 0 merge, null init
+  var autoSync;
 
   var cachedHistoryWordsBackup = <HistoryWord>[];
   var originHistoryWordsBackup = <HistoryWord>[];
@@ -71,7 +72,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
   void initState() {
     super.initState();
     print('initState');
-    futureWords = fetchHistoryWords();
+    futureWords = fetchHistoryWords(false);
   }
 
   @override
@@ -98,7 +99,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                 child: new Text("Merge"),
                 onPressed: () {
                   mergeStrategy = 0;
-                  refresh();
+                  refresh(true);
                   Navigator.of(context).pop();
                 },
               ),
@@ -106,7 +107,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                 child: new Text("Reset"),
                 onPressed: () {
                   mergeStrategy = 1;
-                  refresh();
+                  refresh(true);
                   Navigator.of(context).pop();
                 },
               ),
@@ -331,9 +332,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     return _rows;
   }
 
-  void refresh() {
+  void refresh(bool force) {
     setState(() {
-      futureWords = fetchHistoryWords();
+      futureWords = fetchHistoryWords(force);
     });
   }
 
@@ -434,9 +435,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     cachedHistoryWordsBackup.clear();
   }
 
-  Future<List<HistoryWord>> fetchHistoryWords() async {
+  Future<List<HistoryWord>> fetchHistoryWords(bool force) async {
     print('fetchHistoryWords');
-
     if (mergeStrategy == null) {
       try {
         final resOptions = await Chrome.Extension.storageLocalGet(null);
@@ -447,7 +447,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         } else {
           mergeStrategy = -1;
         }
-        print('mergeStrategy init: $mergeStrategy');
+        autoSync = map['cbvAutoSync'];
+        print('merge strategy init: $mergeStrategy, $autoSync');
       } catch (e) {
         print('err on load options: $e');
       }
@@ -464,95 +465,96 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
     try {
       print('hello?');
-
-      final r = await Chrome.Extension.sendMessage2(
-              "mgijmajocgfcbeboacabfgobmjgjcoja",
-              new SendMessageMessage(getHistory: true),
-              new SendMessageOptions(includeTlsChannelId: false))
-          .timeout(const Duration(seconds: 5));
-
-      Map obj = Chrome.mapify(r);
       var ts = new DateTime.now().millisecondsSinceEpoch;
-      syncTimestramp = ts;
+      if (autoSync || force) {
+        final r = await Chrome.Extension.sendMessage2(
+                "mgijmajocgfcbeboacabfgobmjgjcoja",
+                new SendMessageMessage(getHistory: true),
+                new SendMessageOptions(includeTlsChannelId: false))
+            .timeout(const Duration(seconds: 5));
 
-      print('objMap: ${obj.length}');
+        Map obj = Chrome.mapify(r);
+        syncTimestramp = ts;
 
-      obj.forEach((key, value) {
-        print('handle each');
-        var splited = key.toString().split('<');
-        if (splited.length >= 3) {
-          originHistoryWords.add(HistoryWord(
-              from: splited[0],
-              to: splited[1],
-              word: splited[2],
-              definition: value,
-              storeTimestamp: ts));
-        }
-      });
+        print('objMap: ${obj.length}');
 
-      print('I am here');
-      bool irr = isOriginReset(cachedHistoryWords, originHistoryWords);
-      print('I am here again');
-      print('origin reset? $irr; merge strategy is $mergeStrategy');
-      if (mergeStrategy == -1) {
-        if (cachedHistoryWords.length > originHistoryWords.length) {
-          print('origin become less');
-          // dialog user for choosing merge or reset
-          cachedHistoryWordsBackup.addAll(cachedHistoryWords);
-          originHistoryWordsBackup.addAll(originHistoryWords);
-          throw UnknownMergeStrategyException();
-        } else if (cachedHistoryWords.length < originHistoryWords.length) {
-          print('origin become more');
-          if (irr) {
+        obj.forEach((key, value) {
+          print('handle each');
+          var splited = key.toString().split('<');
+          if (splited.length >= 3) {
+            originHistoryWords.add(HistoryWord(
+                from: splited[0],
+                to: splited[1],
+                word: splited[2],
+                definition: value,
+                storeTimestamp: ts));
+          }
+        });
+
+        bool irr = isOriginReset(cachedHistoryWords, originHistoryWords);
+        print('origin reset? $irr; merge strategy is $mergeStrategy');
+        if (mergeStrategy == -1) {
+          if (cachedHistoryWords.length > originHistoryWords.length) {
+            print('origin become less');
             // dialog user for choosing merge or reset
             cachedHistoryWordsBackup.addAll(cachedHistoryWords);
             originHistoryWordsBackup.addAll(originHistoryWords);
             throw UnknownMergeStrategyException();
+          } else if (cachedHistoryWords.length < originHistoryWords.length) {
+            print('origin become more');
+            if (irr) {
+              // dialog user for choosing merge or reset
+              cachedHistoryWordsBackup.addAll(cachedHistoryWords);
+              originHistoryWordsBackup.addAll(originHistoryWords);
+              throw UnknownMergeStrategyException();
+            } else {
+              // merge directly
+              mergeHistoryWords(
+                  cachedHistoryWords, originHistoryWords, mergedHistoryWords);
+            }
           } else {
-            // merge directly
-            mergeHistoryWords(
-                cachedHistoryWords, originHistoryWords, mergedHistoryWords);
+            print('origin equal cached');
+            if (irr) {
+              // dialog user for choosing merge or reset
+              cachedHistoryWordsBackup.addAll(cachedHistoryWords);
+              originHistoryWordsBackup.addAll(originHistoryWords);
+              throw UnknownMergeStrategyException();
+            } else {
+              // pass, cached words is the latest version
+              print('cached is the latest version');
+              mergedHistoryWords = cachedHistoryWords;
+            }
           }
         } else {
-          print('origin equal cached');
-          if (irr) {
-            // dialog user for choosing merge or reset
-            cachedHistoryWordsBackup.addAll(cachedHistoryWords);
-            originHistoryWordsBackup.addAll(originHistoryWords);
-            throw UnknownMergeStrategyException();
-          } else {
-            // pass, cached words is the latest version
-            print('cached is the latest version');
-            mergedHistoryWords = cachedHistoryWords;
-          }
-        }
-      } else {
-        if (mergeStrategy == 0) {
-          mergeStrategy = -1;
-          // merge
-          if (originHistoryWordsBackup.length > 0 &&
-              cachedHistoryWordsBackup.length > 0) {
-            print(
-                'cb: ${cachedHistoryWordsBackup.length}; ob: ${originHistoryWordsBackup.length}');
-            mergeHistoryWords(cachedHistoryWordsBackup,
-                originHistoryWordsBackup, mergedHistoryWords);
-            originHistoryWordsBackup.clear();
+          if (mergeStrategy == 0) {
+            mergeStrategy = -1;
+            // merge
+            if (originHistoryWordsBackup.length > 0 &&
+                cachedHistoryWordsBackup.length > 0) {
+              print(
+                  'cb: ${cachedHistoryWordsBackup.length}; ob: ${originHistoryWordsBackup.length}');
+              mergeHistoryWords(cachedHistoryWordsBackup,
+                  originHistoryWordsBackup, mergedHistoryWords);
+              originHistoryWordsBackup.clear();
+              cachedHistoryWordsBackup.clear();
+            } else {
+              mergeHistoryWords(
+                  cachedHistoryWords, originHistoryWords, mergedHistoryWords);
+            }
+          } else if (mergeStrategy == 1) {
+            // reset
+            mergeStrategy = -1;
             cachedHistoryWordsBackup.clear();
-          } else {
+            cachedHistoryWords.clear();
             mergeHistoryWords(
                 cachedHistoryWords, originHistoryWords, mergedHistoryWords);
           }
-        } else if (mergeStrategy == 1) {
-          // reset
-          mergeStrategy = -1;
-          cachedHistoryWordsBackup.clear();
-          cachedHistoryWords.clear();
-          mergeHistoryWords(
-              cachedHistoryWords, originHistoryWords, mergedHistoryWords);
         }
-      }
 
-      await _storeCache(mergedHistoryWords);
+        await _storeCache(mergedHistoryWords);
+      } else {
+        mergedHistoryWords = cachedHistoryWords;
+      }
 
       if (mergedHistoryWords.length > 0) {
         print('world! ${originHistoryWords.length} @ $ts');
