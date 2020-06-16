@@ -553,6 +553,13 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
         await _storeCache(mergedHistoryWords);
       } else {
+        var cachedTimestramp = 0;
+        cachedHistoryWords.forEach((hw) {
+          if (hw.storeTimestamp > cachedTimestramp) {
+            cachedTimestramp = hw.storeTimestamp;
+          }
+        });
+        syncTimestramp = cachedTimestramp;
         mergedHistoryWords = cachedHistoryWords;
       }
 
