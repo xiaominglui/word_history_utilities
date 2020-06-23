@@ -164,6 +164,11 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                 });
               },
             ),
+            IconButton(
+              icon: Icon(Icons.file_download),
+              tooltip: 'Increase volume by 10',
+              onPressed: () {},
+            ),
           ];
 
           if (_selectedRowCount == 0) {
@@ -250,12 +255,16 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                               )),
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                            margin: const EdgeInsets.all(16),
-                            child: Text(
-                                'number: ${wordsToShow.length}; sync at ${timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp))}')),
+                      Row(
+                        children: [
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                                margin: const EdgeInsets.all(16),
+                                child: Text(
+                                    'number: ${wordsToShow.length}; sync at ${timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp))}')),
+                          ),
+                        ],
                       ),
                       Expanded(
                         child: ListView(
