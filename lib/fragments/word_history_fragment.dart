@@ -131,6 +131,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
           final selectedActions = <Widget>[
             IconButton(
               icon: Icon(Icons.delete),
+              tooltip: 'Delete words selected',
               onPressed: () {
                 var selected = snapshot.data
                     ?.where((d) => d?.selected ?? false)
@@ -166,7 +167,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
             ),
             IconButton(
               icon: Icon(Icons.file_download),
-              tooltip: 'Increase volume by 10',
+              tooltip: 'Download words selected',
               onPressed: () {},
             ),
           ];
