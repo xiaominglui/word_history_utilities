@@ -9,6 +9,7 @@ import '../chrome_extension.dart' as Chrome;
 import '../chrome_extension.dart' show SendMessageOptions;
 import '../chrome_extension.dart' show SendMessageMessage;
 import 'package:timeago/timeago.dart' as timeago;
+import 'dart:html' as html;
 part 'word_history_fragment.g.dart';
 
 class DetailScreen extends StatelessWidget {
@@ -168,7 +169,24 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
             IconButton(
               icon: Icon(Icons.file_download),
               tooltip: 'Download words selected',
-              onPressed: () {},
+              onPressed: () {
+                // https://stackoverflow.com/questions/59663377/how-to-save-and-download-text-file-in-flutter-web-application
+                final text = 'this is the text file';
+                final bytes = utf8.encode(text);
+                final blob = html.Blob([bytes]);
+                final url = html.Url.createObjectUrlFromBlob(blob);
+                final anchor =
+                    html.document.createElement('a') as html.AnchorElement
+                      ..href = url
+                      ..style.display = 'none'
+                      ..download = 'some_name.txt';
+                html.document.body.children.add(anchor);
+                // download
+                anchor.click();
+                // cleanup
+                html.document.body.children.remove(anchor);
+                html.Url.revokeObjectUrl(url);
+              },
             ),
           ];
 
