@@ -171,15 +171,29 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
               tooltip: 'Download words selected',
               onPressed: () {
                 // https://stackoverflow.com/questions/59663377/how-to-save-and-download-text-file-in-flutter-web-application
-                final text = 'this is the text file';
-                final bytes = utf8.encode(text);
+                var selected = snapshot.data
+                    ?.where((d) => d?.selected ?? false)
+                    ?.toSet()
+                    ?.toList();
+                var b = '';
+                for (var item in selected) {
+                  b = b + item.from;
+                  b = b + "\t";
+                  b = b + item.to;
+                  b = b + "\t";
+                  b = b + item.word;
+                  b = b + "\t";
+                  b = b + item.definition;
+                  b = b + "\n";
+                }
+                final bytes = utf8.encode(b);
                 final blob = html.Blob([bytes]);
                 final url = html.Url.createObjectUrlFromBlob(blob);
                 final anchor =
                     html.document.createElement('a') as html.AnchorElement
                       ..href = url
                       ..style.display = 'none'
-                      ..download = 'some_name.txt';
+                      ..download = 'GoogleDictionaryHistory.csv';
                 html.document.body.children.add(anchor);
                 // download
                 anchor.click();
