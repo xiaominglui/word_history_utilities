@@ -66,6 +66,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
   var originHistoryWordsBackup = <HistoryWord>[];
 
   bool sortWord = false;
+  bool deleting = false;
 
   int syncTimestramp;
 
@@ -134,6 +135,10 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
               icon: Icon(Icons.delete),
               tooltip: 'Delete words selected',
               onPressed: () {
+                setState(() {
+                  deleting = true;
+                });
+
                 var selected = snapshot.data
                     ?.where((d) => d?.selected ?? false)
                     ?.toSet()
@@ -157,6 +162,9 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                     .then((reason) {
                   print('snackbar dismiss: $reason');
                   _storeCache(snapshot.data);
+                  setState(() {
+                    deleting = false;
+                  });
                 });
                 setState(() {
                   for (var item in selected) {

@@ -25,7 +25,8 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _selectedDrawerIndex = 0;
 
-  final GlobalKey<WordHistoryFragmentState> _wordHistoryFragmentState = GlobalKey<WordHistoryFragmentState>();
+  final GlobalKey<WordHistoryFragmentState> _wordHistoryFragmentState =
+      GlobalKey<WordHistoryFragmentState>();
 
   _getDrawerItemWidget(int pos) {
     switch (pos) {
@@ -46,7 +47,11 @@ class HomePageState extends State<HomePage> {
             icon: const Icon(Icons.sync),
             tooltip: 'Sync history words',
             onPressed: () {
-              _wordHistoryFragmentState.currentState.refresh(true);
+              if (_wordHistoryFragmentState.currentState != null && _wordHistoryFragmentState.currentState.deleting != null && !_wordHistoryFragmentState.currentState.deleting) {
+                _startRefresh();
+              } else {
+                print('in deleting, can NOT sync');
+              }
             },
           )
         ];
@@ -55,6 +60,10 @@ class HomePageState extends State<HomePage> {
       default:
         return [];
     }
+  }
+
+  void _startRefresh() {
+    _wordHistoryFragmentState.currentState.refresh(true);
   }
 
   _onSelectItem(int index) {
@@ -86,7 +95,9 @@ class HomePageState extends State<HomePage> {
         child: new Column(
           children: <Widget>[
             new UserAccountsDrawerHeader(
-                accountName: new Text("Utilities for Word History of Google Dictionary Extension"), accountEmail: null),
+                accountName: new Text(
+                    "Utilities for Word History of Google Dictionary Extension"),
+                accountEmail: null),
             new Column(children: drawerOptions)
           ],
         ),
