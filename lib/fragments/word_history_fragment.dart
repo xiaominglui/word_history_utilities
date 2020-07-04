@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 import 'package:word_history_utilities/exceptions/UnknownMergeStrategyException.dart';
+import 'package:word_history_utilities/i18n/i18n_minimal.dart';
 import '../chrome_extension.dart' as Chrome;
 import '../chrome_extension.dart' show SendMessageOptions;
 import '../chrome_extension.dart' show SendMessageMessage;
@@ -332,7 +333,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                         });
                                       },
                                       numeric: false,
-                                      label: Text('word')),
+                                      label: Text(MinimalLocalizations.of(context).wordTitle)),
                                   DataColumn(label: Text('definition')),
                                   DataColumn(label: Text('from')),
                                   DataColumn(label: Text('to')),

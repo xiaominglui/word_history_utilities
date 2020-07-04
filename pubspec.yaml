@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   js: ">=0.6.0 <0.7.0"
   json_annotation: ^3.0.0
   timeago: ^2.0.26
