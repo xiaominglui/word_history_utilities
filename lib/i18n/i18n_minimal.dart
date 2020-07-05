@@ -14,11 +14,13 @@ class MinimalLocalizations {
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'title_app': 'Utilities for Word History of Google Dictionary Extension',
-      'title_word': "Word"
+      'title_word': "Word",
+      'title_definision': "Definision"
     },
     'zh': {
       'title_app': 'Google词典扩展小工具',
-      'title_word': '生词'
+      'title_word': '生词',
+      'title_definision': "定义"
     },
   };
 
@@ -28,6 +30,10 @@ class MinimalLocalizations {
 
   String get wordTitle {
     return _localizedValues[locale.languageCode]['title_word'];
+  }
+
+  String get definisionTitle {
+    return _localizedValues[locale.languageCode]['title_definision'];
   }
 }
 

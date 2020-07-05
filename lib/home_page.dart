@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:word_history_utilities/fragments/options_fragment.dart';
 import 'package:word_history_utilities/fragments/word_history_fragment.dart';
 
+import 'i18n/i18n_minimal.dart';
+
 class DrawerItem {
   String title;
   IconData icon;
@@ -47,7 +49,9 @@ class HomePageState extends State<HomePage> {
             icon: const Icon(Icons.sync),
             tooltip: 'Sync history words',
             onPressed: () {
-              if (_wordHistoryFragmentState.currentState != null && _wordHistoryFragmentState.currentState.deleting != null && !_wordHistoryFragmentState.currentState.deleting) {
+              if (_wordHistoryFragmentState.currentState != null &&
+                  _wordHistoryFragmentState.currentState.deleting != null &&
+                  !_wordHistoryFragmentState.currentState.deleting) {
                 _startRefresh();
               } else {
                 print('in deleting, can NOT sync');
@@ -95,8 +99,7 @@ class HomePageState extends State<HomePage> {
         child: new Column(
           children: <Widget>[
             new UserAccountsDrawerHeader(
-                accountName: new Text(
-                    "Utilities for Word History of Google Dictionary Extension"),
+                accountName: Text(MinimalLocalizations.of(context).appTitle),
                 accountEmail: null),
             new Column(children: drawerOptions)
           ],

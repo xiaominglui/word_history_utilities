@@ -334,7 +334,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                       },
                                       numeric: false,
                                       label: Text(MinimalLocalizations.of(context).wordTitle)),
-                                  DataColumn(label: Text('definition')),
+                                  DataColumn(label: Text(MinimalLocalizations.of(context).definisionTitle)),
                                   DataColumn(label: Text('from')),
                                   DataColumn(label: Text('to')),
                                 ],
