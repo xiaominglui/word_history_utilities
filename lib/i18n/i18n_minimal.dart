@@ -15,12 +15,20 @@ class MinimalLocalizations {
     'en': {
       'title_app': 'Utilities for Word History of Google Dictionary Extension',
       'title_word': "Word",
-      'title_definision': "Definision"
+      'title_definision': "Definision",
+      'menu_word_history': "Word History",
+      'menu_options': "Options",
+      'menu_privacy': 'Privacy',
+      'menu_help': 'Help'
     },
     'zh': {
       'title_app': 'Google词典扩展小工具',
       'title_word': '生词',
-      'title_definision': "定义"
+      'title_definision': "定义",
+      'menu_word_history': "查词历史",
+      'menu_options': "选项",
+      'menu_privacy': '隐私',
+      'menu_help': '帮助'
     },
   };
 
@@ -34,6 +42,22 @@ class MinimalLocalizations {
 
   String get definisionTitle {
     return _localizedValues[locale.languageCode]['title_definision'];
+  }
+
+  String get wordHistoryMenu {
+    return _localizedValues[locale.languageCode]['menu_word_history'];
+  }
+
+  String get optionsMenu {
+    return _localizedValues[locale.languageCode]['menu_options'];
+  }
+
+  String get privacyMenu {
+    return _localizedValues[locale.languageCode]['menu_privacy'];
+  }
+
+  String get helpMenu {
+    return _localizedValues[locale.languageCode]['menu_help'];
   }
 }
 
