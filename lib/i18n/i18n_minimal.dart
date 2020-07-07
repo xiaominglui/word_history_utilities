@@ -19,7 +19,13 @@ class MinimalLocalizations {
       'menu_word_history': "Word History",
       'menu_options': "Options",
       'menu_privacy': 'Privacy',
-      'menu_help': 'Help'
+      'menu_help': 'Help',
+      'option_sync_on_launch': 'Sync word history on launch:',
+      'option_add_to_review_list': 'Add words to review list on sync:',
+      'option_always_merge': 'Always merge on sync:',
+      'btn_save': 'Save',
+      'btn_reset': 'Reset',
+      'sbar_options_saved': 'Options saved'
     },
     'zh': {
       'title_app': 'Google词典扩展小工具',
@@ -28,7 +34,13 @@ class MinimalLocalizations {
       'menu_word_history': "查词历史",
       'menu_options': "选项",
       'menu_privacy': '隐私',
-      'menu_help': '帮助'
+      'menu_help': '帮助',
+      'option_sync_on_launch': '启动时立即与Google词典扩展同步：',
+      'option_add_to_review_list': '新词自动加入回顾列表：',
+      'option_always_merge': '同步时自动合并：',
+      'btn_save': '保存',
+      'btn_reset': '重置',
+      'sbar_options_saved': '选项已保存'
     },
   };
 
@@ -58,6 +70,30 @@ class MinimalLocalizations {
 
   String get helpMenu {
     return _localizedValues[locale.languageCode]['menu_help'];
+  }
+
+  String get syncOnLaunch {
+    return _localizedValues[locale.languageCode]['option_sync_on_launch'];
+  }
+
+  String get addToReviewList {
+    return _localizedValues[locale.languageCode]['option_add_to_review_list'];
+  }
+
+  String get alwaysMerge {
+    return _localizedValues[locale.languageCode]['option_always_merge'];
+  }
+
+  String get btnSave {
+    return _localizedValues[locale.languageCode]['btn_save'];
+  }
+
+  String get btnReset {
+    return _localizedValues[locale.languageCode]['btn_reset'];
+  }
+
+  String get sbarSaved {
+    return _localizedValues[locale.languageCode]['sbar_options_saved'];
   }
 }
 

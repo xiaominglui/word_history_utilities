@@ -1,6 +1,7 @@
 import 'dart:js';
 
 import 'package:flutter/material.dart';
+import 'package:word_history_utilities/i18n/i18n_minimal.dart';
 import 'dart:async';
 import 'dart:convert';
 import '../chrome_extension.dart' as Chrome;
@@ -91,7 +92,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
       child: Column(children: [
         Row(
           children: [
-            Text('Sync word history on launch: '),
+            Text(MinimalLocalizations.of(context).syncOnLaunch),
             Checkbox(
               value: cbvAutoSync,
               onChanged: (value) {
@@ -104,7 +105,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
           ],
         ),
         Row(children: [
-          Text('Add words to review list on sync: '),
+          Text(MinimalLocalizations.of(context).addToReviewList),
           Checkbox(
             value: cbvAutoAdd,
             onChanged: (value) {
@@ -116,7 +117,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
           )
         ]),
         Row(children: [
-          Text('Always merge on sync: '),
+          Text(MinimalLocalizations.of(context).alwaysMerge),
           Checkbox(
             value: cbvAlwaysMerge,
             onChanged: (value) {
@@ -142,12 +143,12 @@ class _OptionsFragmentState extends State<OptionsFragment> {
                           hasChanged = false;
                         });
                         Scaffold.of(context).showSnackBar(SnackBar(
-                          content: Text('Options saved'),
+                          content: Text(MinimalLocalizations.of(context).sbarSaved),
                           duration: const Duration(seconds: 3),
                         ));
                       }
                     : null,
-                child: Text('Save')),
+                child: Text(MinimalLocalizations.of(context).btnSave)),
             FlatButton(
                 onPressed: hasChanged
                     ? () {
@@ -159,7 +160,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
                         });
                       }
                     : null,
-                child: Text('Reset')),
+                child: Text(MinimalLocalizations.of(context).btnReset)),
           ],
         )
       ]),
