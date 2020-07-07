@@ -11,13 +11,6 @@ class DrawerItem {
 }
 
 class HomePage extends StatefulWidget {
-  final drawerItems = [
-    new DrawerItem("Word History", Icons.map),
-    new DrawerItem("Options", Icons.star),
-    new DrawerItem("Privacy", Icons.lock),
-    new DrawerItem("Help", Icons.help)
-  ];
-
   @override
   State<StatefulWidget> createState() {
     return new HomePageState();
@@ -78,8 +71,15 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     List<Widget> drawerOptions = [];
-    for (var i = 0; i < widget.drawerItems.length; i++) {
-      var d = widget.drawerItems[i];
+    final drawerItems = [
+      new DrawerItem(
+          MinimalLocalizations.of(context).wordHistoryMenu, Icons.map),
+      new DrawerItem(MinimalLocalizations.of(context).optionsMenu, Icons.star),
+      new DrawerItem(MinimalLocalizations.of(context).privacyMenu, Icons.lock),
+      new DrawerItem(MinimalLocalizations.of(context).helpMenu, Icons.help)
+    ];
+    for (var i = 0; i < drawerItems.length; i++) {
+      var d = drawerItems[i];
       drawerOptions.add(new ListTile(
         leading: new Icon(d.icon),
         title: new Text(d.title),
@@ -92,7 +92,7 @@ class HomePageState extends State<HomePage> {
       appBar: new AppBar(
         // here we display the title corresponding to the fragment
         // you can instead choose to have a static title
-        title: new Text(widget.drawerItems[_selectedDrawerIndex].title),
+        title: new Text(drawerItems[_selectedDrawerIndex].title),
         actions: _getAppbarActions(_selectedDrawerIndex),
       ),
       drawer: new Drawer(
