@@ -1,6 +1,7 @@
 import 'dart:js';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
@@ -93,13 +94,14 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         builder: (BuildContext context) {
           // return object of type Dialog
           return AlertDialog(
-            title: new Text("Choose a merge strategy"),
+            title: new Text(
+                MinimalLocalizations.of(context).mergeStrategyDialogTitle),
             content: new Text(
-                "Detect your Google Dictionary Extension word history reseted after last sync, Press Merge button to keep words synced before, or Reset button to keep same with Google Dictionary Extenstion."),
+                MinimalLocalizations.of(context).mergeStrategyDialogContent),
             actions: <Widget>[
               // usually buttons at the bottom of the dialog
               new FlatButton(
-                child: new Text("Merge"),
+                child: new Text(MinimalLocalizations.of(context).btnMerge),
                 onPressed: () {
                   mergeStrategy = 0;
                   refresh(true);
@@ -107,7 +109,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                 },
               ),
               new FlatButton(
-                child: new Text("Reset"),
+                child: new Text(MinimalLocalizations.of(context).btnReset),
                 onPressed: () {
                   mergeStrategy = 1;
                   refresh(true);
@@ -134,7 +136,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
           final selectedActions = <Widget>[
             IconButton(
               icon: Icon(Icons.delete),
-              tooltip: 'Delete words selected',
+              tooltip: MinimalLocalizations.of(context).deleteToolTip,
               onPressed: () {
                 setState(() {
                   deleting = true;
@@ -149,7 +151,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                         ? 'Remove ${selected.length} words'
                         : 'Remove ${selected.length} word'),
                     action: SnackBarAction(
-                        label: 'Undo',
+                        label: MinimalLocalizations.of(context).btnUndo,
                         onPressed: () {
                           setState(() {
                             for (var item in selected) {
@@ -177,7 +179,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
             ),
             IconButton(
               icon: Icon(Icons.file_download),
-              tooltip: 'Download words selected',
+              tooltip: MinimalLocalizations.of(context).downloadToolTip,
               onPressed: () {
                 // https://stackoverflow.com/questions/59663377/how-to-save-and-download-text-file-in-flutter-web-application
                 var selected = snapshot.data
@@ -304,7 +306,18 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                             child: Container(
                                 margin: const EdgeInsets.all(16),
                                 child: Text(
-                                    'number: ${wordsToShow.length}; sync at ${timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp))}')),
+                                    // 'number: ${wordsToShow.length}; sync at ${}'
+                                    Intl.plural(wordsToShow.length,
+                                        one: MinimalLocalizations.of(context)
+                                            .syncStatusSingular
+                                            .format(List<String>()
+                                              ..add(wordsToShow.length.toString())
+                                              ..add(timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp)))),
+                                        other: MinimalLocalizations.of(context)
+                                            .syncStatusPlural
+                                            .format(List<String>()
+                                              ..add(wordsToShow.length.toString())
+                                              ..add(timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp))))))),
                           ),
                         ],
                       ),
@@ -333,10 +346,15 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                         });
                                       },
                                       numeric: false,
-                                      label: Text(MinimalLocalizations.of(context).wordTitle)),
-                                  DataColumn(label: Text(MinimalLocalizations.of(context).definisionTitle)),
-                                  DataColumn(label: Text('from')),
-                                  DataColumn(label: Text('to')),
+                                      label: Text(
+                                          MinimalLocalizations.of(context)
+                                              .wordTitle)),
+                                  DataColumn(
+                                      label: Text(
+                                          MinimalLocalizations.of(context)
+                                              .definisionTitle)),
+                                  DataColumn(label: Text(MinimalLocalizations.of(context).fromTitle)),
+                                  DataColumn(label: Text(MinimalLocalizations.of(context).toTitle)),
                                 ],
                                 rows: _buildRows(wordsToShow?.length ?? 0,
                                     (int index) {

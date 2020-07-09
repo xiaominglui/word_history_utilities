@@ -42,7 +42,7 @@ class HomePageState extends State<HomePage> {
         return [
           IconButton(
             icon: const Icon(Icons.sync),
-            tooltip: 'Sync history words',
+            tooltip: MinimalLocalizations.of(context).syncToolTip,
             onPressed: () {
               if (_wordHistoryFragmentState.currentState != null &&
                   _wordHistoryFragmentState.currentState.deleting != null &&
