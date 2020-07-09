@@ -88,7 +88,8 @@ class _OptionsFragmentState extends State<OptionsFragment> {
 
   @override
   Widget build(BuildContext context) {
-    return new Center(
+    return new Container(
+      padding: const EdgeInsets.all(16),
       child: Column(children: [
         Row(
           children: [

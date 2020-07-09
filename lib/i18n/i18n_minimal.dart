@@ -19,6 +19,8 @@ class MinimalLocalizations {
       'menu_word_history': "Word History",
       'menu_options': "Options",
       'menu_privacy': 'Privacy',
+      'menu_terms': 'Terms',
+      'menu_policy': 'Policy',
       'menu_help': 'Help',
       'option_sync_on_launch': 'Sync word history on launch:',
       'option_add_to_review_list': 'Add words to review list on sync:',
@@ -34,6 +36,8 @@ class MinimalLocalizations {
       'menu_word_history': "查词历史",
       'menu_options': "选项",
       'menu_privacy': '隐私',
+      'menu_terms': '条款',
+      'menu_policy': '政策',
       'menu_help': '帮助',
       'option_sync_on_launch': '启动时立即与Google词典扩展同步：',
       'option_add_to_review_list': '新词自动加入回顾列表：',
@@ -66,6 +70,14 @@ class MinimalLocalizations {
 
   String get privacyMenu {
     return _localizedValues[locale.languageCode]['menu_privacy'];
+  }
+
+  String get termsMenu {
+    return _localizedValues[locale.languageCode]['menu_terms'];
+  }
+
+  String get policyMenu {
+    return _localizedValues[locale.languageCode]['menu_policy'];
   }
 
   String get helpMenu {
