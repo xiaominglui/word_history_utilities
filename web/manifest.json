@@ -1,6 +1,6 @@
 {
-    "name": "Word History Utilities",
-    "version": "0.1",
+    "name": "GDictionary Word History Mate",
+    "version": "0.9",
     "description": "Utilities of Google Dictionary Extension Word History.",
     "permissions": [
         "tabs",
