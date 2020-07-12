@@ -17,17 +17,17 @@
     "options_page": "index.html",
     "browser_action": {
         "default_icon": {
-            "16": "images/get_started16.png",
-            "32": "images/get_started32.png",
-            "48": "images/get_started48.png",
-            "128": "images/get_started128.png"
+            "16": "images/ic_launcher16.png",
+            "32": "images/ic_launcher32.png",
+            "48": "images/ic_launcher48.png",
+            "128": "images/ic_launcher128.png"
         }
     },
     "icons": {
-        "16": "images/get_started16.png",
-        "32": "images/get_started32.png",
-        "48": "images/get_started48.png",
-        "128": "images/get_started128.png"
+        "16": "images/ic_launcher16.png",
+        "32": "images/ic_launcher32.png",
+        "48": "images/ic_launcher48.png",
+        "128": "images/ic_launcher128.png"
     },
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "manifest_version": 2
