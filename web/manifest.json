@@ -1,7 +1,7 @@
 {
-    "name": "GDictionary Word History Mate",
+    "name": "Google Dictionary Word History Gadget",
     "version": "0.9",
-    "description": "Utilities of Google Dictionary Extension Word History.",
+    "description": "Organize the word history, and make it more valuable",
     "permissions": [
         "tabs",
         "activeTab",

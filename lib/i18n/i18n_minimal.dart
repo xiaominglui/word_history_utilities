@@ -13,7 +13,7 @@ class MinimalLocalizations {
 
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'title_app': 'Utilities for Word History of Google Dictionary Extension',
+      'title_app': 'Google Dictionary Word History Gadget',
       'title_word': "Word",
       'title_definision': "Definision",
       'title_from': 'Source',
@@ -41,7 +41,7 @@ class MinimalLocalizations {
       'sync_status_plural': 'Number of words stored in history: %1\$; sync at: %2\$'
     },
     'zh': {
-      'title_app': 'Google词典扩展小工具',
+      'title_app': 'Google字典单词历史小工具',
       'title_word': '生词',
       'title_definision': '定义',
       'title_from': '源语言',
@@ -54,7 +54,7 @@ class MinimalLocalizations {
       'menu_terms': '条款',
       'menu_policy': '政策',
       'menu_help': '帮助',
-      'option_sync_on_launch': '启动时立即与Google词典扩展同步：',
+      'option_sync_on_launch': '启动时立即与Google字典扩展同步：',
       'option_add_to_review_list': '新词自动加入回顾列表：',
       'option_always_merge': '同步时自动合并：',
       'btn_save': '保存',
