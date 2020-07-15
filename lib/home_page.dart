@@ -78,7 +78,6 @@ class HomePageState extends State<HomePage> {
           MinimalLocalizations.of(context).wordHistoryMenu, Icons.history),
       new DrawerItem(
           MinimalLocalizations.of(context).optionsMenu, Icons.settings),
-      new DrawerItem(MinimalLocalizations.of(context).helpMenu, Icons.help)
     ];
     for (var i = 0; i < drawerItems.length; i++) {
       var d = drawerItems[i];
@@ -104,6 +103,20 @@ class HomePageState extends State<HomePage> {
                 accountName: Text(MinimalLocalizations.of(context).appTitle),
                 accountEmail: null),
             new Column(children: drawerOptions),
+            new ListTile(
+              leading: Icon(Icons.help),
+              title: Text(MinimalLocalizations.of(context).helpMenu),
+              onTap: () async {
+                final url = 'https://policies.google.com/privacy?hl=en';
+                if (await canLaunch(url)) {
+                  await launch(
+                    url,
+                    forceSafariVC: false,
+                  );
+                }
+                Navigator.of(context).pop();
+              },
+            ),
             new Expanded(
                 child: Container(
               alignment: Alignment.bottomLeft,
@@ -115,7 +128,8 @@ class HomePageState extends State<HomePage> {
                       style: Theme.of(context).textTheme.caption,
                       recognizer: new TapGestureRecognizer()
                         ..onTap = () async {
-                          final url = 'https://policies.google.com/privacy?hl=en';
+                          final url =
+                              'https://policies.google.com/privacy?hl=en';
                           if (await canLaunch(url)) {
                             await launch(
                               url,
@@ -147,7 +161,8 @@ class HomePageState extends State<HomePage> {
                       style: Theme.of(context).textTheme.caption,
                       recognizer: new TapGestureRecognizer()
                         ..onTap = () async {
-                          final url = 'https://support.google.com/photos/answer/9292998?hl=en';
+                          final url =
+                              'https://support.google.com/photos/answer/9292998?hl=en';
                           if (await canLaunch(url)) {
                             await launch(
                               url,
