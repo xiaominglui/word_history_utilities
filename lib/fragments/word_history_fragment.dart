@@ -81,6 +81,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
 
   @override
   Widget build(BuildContext context) {
+    print('WordHistoryFragmentState build');
     final ThemeData themeData = Theme.of(context);
     final MaterialLocalizations localizations =
         MaterialLocalizations.of(context);
@@ -126,124 +127,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       child: FutureBuilder<List<HistoryWord>>(
         future: futureWords,
         builder: (context, snapshot) {
-          int _selectedRowCount = snapshot.data
-                  .where((element) => element.selected ?? false)
-                  .toSet()
-                  .toList()
-                  .length ??
-              0;
-
-          final selectedActions = <Widget>[
-            IconButton(
-              icon: Icon(Icons.delete),
-              tooltip: MinimalLocalizations.of(context).deleteToolTip,
-              onPressed: () {
-                setState(() {
-                  deleting = true;
-                });
-
-                var selected = snapshot.data
-                    ?.where((d) => d?.selected ?? false)
-                    ?.toSet()
-                    ?.toList();
-                final snackBar = SnackBar(
-                    content: Text(selected.length > 1
-                        ? 'Remove ${selected.length} words'
-                        : 'Remove ${selected.length} word'),
-                    action: SnackBarAction(
-                        label: MinimalLocalizations.of(context).btnUndo,
-                        onPressed: () {
-                          setState(() {
-                            for (var item in selected) {
-                              item.deleted = false;
-                            }
-                          });
-                        }));
-                Scaffold.of(context)
-                    .showSnackBar(snackBar)
-                    .closed
-                    .then((reason) {
-                  print('snackbar dismiss: $reason');
-                  _storeCache(snapshot.data);
-                  setState(() {
-                    deleting = false;
-                  });
-                });
-                setState(() {
-                  for (var item in selected) {
-                    item.deleted = true;
-                    item.selected = false;
-                  }
-                });
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.file_download),
-              tooltip: MinimalLocalizations.of(context).downloadToolTip,
-              onPressed: () {
-                // https://stackoverflow.com/questions/59663377/how-to-save-and-download-text-file-in-flutter-web-application
-                var selected = snapshot.data
-                    ?.where((d) => d?.selected ?? false)
-                    ?.toSet()
-                    ?.toList();
-                var b = '';
-                for (var item in selected) {
-                  b = b + item.from;
-                  b = b + "\t";
-                  b = b + item.to;
-                  b = b + "\t";
-                  b = b + item.word;
-                  b = b + "\t";
-                  b = b + item.definition;
-                  b = b + "\n";
-                }
-                final bytes = utf8.encode(b);
-                final blob = html.Blob([bytes]);
-                final url = html.Url.createObjectUrlFromBlob(blob);
-                final anchor =
-                    html.document.createElement('a') as html.AnchorElement
-                      ..href = url
-                      ..style.display = 'none'
-                      ..download = 'GoogleDictionaryHistory.csv';
-                html.document.body.children.add(anchor);
-                // download
-                anchor.click();
-                // cleanup
-                html.document.body.children.remove(anchor);
-                html.Url.revokeObjectUrl(url);
-              },
-            ),
-          ];
-
-          if (_selectedRowCount == 0) {
-            // headerWidgets.add(Expanded(child: const Text('Data Management')));
-            // if (header is ButtonBar) {
-            //   // We adjust the padding when a button bar is present, because the
-            //   // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
-            //   // around each button on each side, and the button itself will have 8
-            //   // pixels internally on each side, yet we want the left edge of the
-            //   // inside of the button to line up with the 24.0 left inset.
-            //   // Better magic. See https://github.com/flutter/flutter/issues/4460
-            //   startPadding = 12.0;
-            // }
-          } else {
-            headerWidgets.add(Expanded(
-              child:
-                  Text(localizations.selectedRowCountTitle(_selectedRowCount)),
-            ));
-          }
-
-          if (_selectedRowCount != 0) {
-            headerWidgets.addAll(selectedActions.map<Widget>((Widget action) {
-              return Padding(
-                // 8.0 is the default padding of an icon button
-                padding:
-                    const EdgeInsetsDirectional.only(start: 24.0 - 8.0 * 2.0),
-                child: action,
-              );
-            }).toList());
-          }
-
+          print('FutureBuilder build');
           switch (snapshot.connectionState) {
             case ConnectionState.none:
             case ConnectionState.waiting:
@@ -257,6 +141,125 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                 }
               } else {
                 if (snapshot.hasData) {
+                  int _selectedRowCount = snapshot.data
+                          .where((element) => element.selected ?? false)
+                          .toSet()
+                          .toList()
+                          .length ??
+                      0;
+
+                  final selectedActions = <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.delete),
+                      tooltip: MinimalLocalizations.of(context).deleteToolTip,
+                      onPressed: () {
+                        setState(() {
+                          deleting = true;
+                        });
+
+                        var selected = snapshot.data
+                            ?.where((d) => d?.selected ?? false)
+                            ?.toSet()
+                            ?.toList();
+                        final snackBar = SnackBar(
+                            content: Text(selected.length > 1
+                                ? 'Remove ${selected.length} words'
+                                : 'Remove ${selected.length} word'),
+                            action: SnackBarAction(
+                                label: MinimalLocalizations.of(context).btnUndo,
+                                onPressed: () {
+                                  setState(() {
+                                    for (var item in selected) {
+                                      item.deleted = false;
+                                    }
+                                  });
+                                }));
+                        Scaffold.of(context)
+                            .showSnackBar(snackBar)
+                            .closed
+                            .then((reason) {
+                          print('snackbar dismiss: $reason');
+                          _storeCache(snapshot.data);
+                          setState(() {
+                            deleting = false;
+                          });
+                        });
+                        setState(() {
+                          for (var item in selected) {
+                            item.deleted = true;
+                            item.selected = false;
+                          }
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.file_download),
+                      tooltip: MinimalLocalizations.of(context).downloadToolTip,
+                      onPressed: () {
+                        // https://stackoverflow.com/questions/59663377/how-to-save-and-download-text-file-in-flutter-web-application
+                        var selected = snapshot.data
+                            ?.where((d) => d?.selected ?? false)
+                            ?.toSet()
+                            ?.toList();
+                        var b = '';
+                        for (var item in selected) {
+                          b = b + item.from;
+                          b = b + "\t";
+                          b = b + item.to;
+                          b = b + "\t";
+                          b = b + item.word;
+                          b = b + "\t";
+                          b = b + item.definition;
+                          b = b + "\n";
+                        }
+                        final bytes = utf8.encode(b);
+                        final blob = html.Blob([bytes]);
+                        final url = html.Url.createObjectUrlFromBlob(blob);
+                        final anchor = html.document.createElement('a')
+                            as html.AnchorElement
+                          ..href = url
+                          ..style.display = 'none'
+                          ..download = 'GoogleDictionaryHistory.csv';
+                        html.document.body.children.add(anchor);
+                        // download
+                        anchor.click();
+                        // cleanup
+                        html.document.body.children.remove(anchor);
+                        html.Url.revokeObjectUrl(url);
+                      },
+                    ),
+                  ];
+
+                  if (_selectedRowCount == 0) {
+                    // headerWidgets.add(Expanded(child: const Text('Data Management')));
+                    // if (header is ButtonBar) {
+                    //   // We adjust the padding when a button bar is present, because the
+                    //   // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
+                    //   // around each button on each side, and the button itself will have 8
+                    //   // pixels internally on each side, yet we want the left edge of the
+                    //   // inside of the button to line up with the 24.0 left inset.
+                    //   // Better magic. See https://github.com/flutter/flutter/issues/4460
+                    //   startPadding = 12.0;
+                    // }
+                  } else {
+                    headerWidgets.add(Expanded(
+                      child: Text(localizations
+                          .selectedRowCountTitle(_selectedRowCount)),
+                    ));
+                  }
+
+                  if (_selectedRowCount != 0) {
+                    headerWidgets
+                        .addAll(selectedActions.map<Widget>((Widget action) {
+                      return Padding(
+                        // 8.0 is the default padding of an icon button
+                        padding: const EdgeInsetsDirectional.only(
+                            start: 24.0 - 8.0 * 2.0),
+                        child: action,
+                      );
+                    }).toList());
+                  }
+
                   if (sortWord) {
                     snapshot.data.sort((a, b) => b.word.compareTo(a.word));
                   } else {
@@ -311,8 +314,11 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                         one: MinimalLocalizations.of(context)
                                             .syncStatusSingular
                                             .format(List<String>()
-                                              ..add(wordsToShow.length.toString())
-                                              ..add(timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp)))),
+                                              ..add(
+                                                  wordsToShow.length.toString())
+                                              ..add(timeago.format(DateTime
+                                                  .fromMillisecondsSinceEpoch(
+                                                      syncTimestramp)))),
                                         other: MinimalLocalizations.of(context)
                                             .syncStatusPlural
                                             .format(List<String>()
@@ -353,8 +359,14 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                       label: Text(
                                           MinimalLocalizations.of(context)
                                               .definisionTitle)),
-                                  DataColumn(label: Text(MinimalLocalizations.of(context).fromTitle)),
-                                  DataColumn(label: Text(MinimalLocalizations.of(context).toTitle)),
+                                  DataColumn(
+                                      label: Text(
+                                          MinimalLocalizations.of(context)
+                                              .fromTitle)),
+                                  DataColumn(
+                                      label: Text(
+                                          MinimalLocalizations.of(context)
+                                              .toTitle)),
                                 ],
                                 rows: _buildRows(wordsToShow?.length ?? 0,
                                     (int index) {
@@ -459,7 +471,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       if (hw.length > 0) {
         return hw;
       } else {
-        throw Exception('your word history is empty');
+        throw Exception('cached word history is empty');
       }
     } catch (e) {
       print('loadCache Caught e: $e');
@@ -505,7 +517,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
   }
 
   Future<List<HistoryWord>> fetchHistoryWords(bool force) async {
-    print('fetchHistoryWords');
+    print('fetchHistoryWords: $force');
     if (mergeStrategy == null) {
       try {
         final resOptions = await Chrome.Extension.storageLocalGet(null);
@@ -521,6 +533,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       } catch (e) {
         print('err on load options: $e');
       }
+    } else {
+      print('mergeStrategy: $mergeStrategy');
     }
 
     var cachedHistoryWords = <HistoryWord>[];
@@ -566,8 +580,14 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
           if (cachedHistoryWords.length > originHistoryWords.length) {
             print('origin become less');
             // dialog user for choosing merge or reset
-            cachedHistoryWordsBackup.addAll(cachedHistoryWords);
-            originHistoryWordsBackup.addAll(originHistoryWords);
+            if (cachedHistoryWords.length > 0) {
+              cachedHistoryWordsBackup.addAll(cachedHistoryWords);
+            }
+
+            if (originHistoryWords.length > 0) {
+              originHistoryWordsBackup.addAll(originHistoryWords);
+            }
+
             throw UnknownMergeStrategyException();
           } else if (cachedHistoryWords.length < originHistoryWords.length) {
             print('origin become more');
@@ -596,7 +616,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
           }
         } else {
           if (mergeStrategy == 0) {
-            mergeStrategy = -1;
             // merge
             if (originHistoryWordsBackup.length > 0 &&
                 cachedHistoryWordsBackup.length > 0) {
@@ -612,7 +631,6 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
             }
           } else if (mergeStrategy == 1) {
             // reset
-            mergeStrategy = -1;
             cachedHistoryWordsBackup.clear();
             cachedHistoryWords.clear();
             mergeHistoryWords(
@@ -643,7 +661,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       throw Exception('Failed to load history words');
     } on TimeoutException catch (e) {
       print('Timeout: $e');
-      throw Exception('load history words timeout');
+      throw Exception('retrieve word timeout');
     }
   }
 
