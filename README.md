@@ -1,16 +1,11 @@
-# word_history_utilities
+# Google Dictionary Word History Utility
 
-utilities for Google dictionary extension word history.
+The extension that organize your word history, and make use of it at most.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Download
+TBD
+## Build Project
+git clone https://github.com/xiaominglui/word_history_utilities.git
+cd word_history_utilities
+flutter build web
+Artifacts can be found in build/web

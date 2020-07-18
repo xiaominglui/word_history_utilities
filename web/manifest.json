@@ -1,7 +1,7 @@
 {
-    "name": "Google Dictionary Word History Gadget",
+    "name": "Google Dictionary Word History Utility",
     "version": "0.9",
-    "description": "Organize the word history, and make it more valuable",
+    "description": "Organize your word history, and make use of it at most.",
     "permissions": [
         "tabs",
         "activeTab",
