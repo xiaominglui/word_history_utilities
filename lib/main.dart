@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:word_history_utilities/home_page.dart';
 
 import 'i18n/i18n_minimal.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class _MyAppState extends State<MyApp> {
   @override
@@ -34,4 +35,8 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-void main() => runApp(MyApp());
+void main() async {
+  timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
+  timeago.setLocaleMessages('zh', timeago.ZhCnMessages());
+  runApp(MyApp());
+}

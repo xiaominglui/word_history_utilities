@@ -136,7 +136,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
               if (snapshot.hasError) {
                 if (snapshot.error is UnknownMergeStrategyException) {
                   _showMergeStrategryChooserDialog();
-                } else if(snapshot.error is TimeoutException) {
+                } else if (snapshot.error is TimeoutException) {
                   return Text(MinimalLocalizations.of(context).retrieveTimeout);
                 } else {
                   return Text("${snapshot.error}");
@@ -320,12 +320,12 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                                   wordsToShow.length.toString())
                                               ..add(timeago.format(DateTime
                                                   .fromMillisecondsSinceEpoch(
-                                                      syncTimestramp)))),
+                                                      syncTimestramp), locale: MinimalLocalizations.of(context).locale.languageCode))),
                                         other: MinimalLocalizations.of(context)
                                             .syncStatusPlural
                                             .format(List<String>()
                                               ..add(wordsToShow.length.toString())
-                                              ..add(timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp))))))),
+                                              ..add(timeago.format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp), locale: MinimalLocalizations.of(context).locale.languageCode)))))),
                           ),
                         ],
                       ),
