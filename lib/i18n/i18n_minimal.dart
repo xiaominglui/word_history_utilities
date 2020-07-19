@@ -38,7 +38,8 @@ class MinimalLocalizations {
       'tooltip_delete': 'Delete words selected',
       'tooltip_sync': 'Sync history words',
       'sync_status_singular': 'Number of words stored in history: %1\$; sync at: %2\$',
-      'sync_status_plural': 'Number of words stored in history: %1\$; sync at: %2\$'
+      'sync_status_plural': 'Number of words stored in history: %1\$; sync at: %2\$',
+      'retrieve_timeout': 'retrieve word history timeout'
     },
     'zh': {
       'title_app': 'Google字典单词历史小工具',
@@ -66,7 +67,8 @@ class MinimalLocalizations {
       'tooltip_delete': '删除所选单词',
       'tooltip_sync': '同步查词历史',
       'sync_status_singular': '历史记录中存储的单词数: %1\$；同步于：%2\$',
-      'sync_status_plural': '历史记录中存储的单词数: %1\$；同步于：%2\$'
+      'sync_status_plural': '历史记录中存储的单词数: %1\$；同步于：%2\$',
+      'retrieve_timeout': '检索查词历史超时'
     },
   };
 
@@ -172,6 +174,10 @@ class MinimalLocalizations {
 
   String get syncStatusPlural {
     return _localizedValues[locale.languageCode]['sync_status_plural'];
+  }
+
+  String get retrieveTimeout {
+    return _localizedValues[locale.languageCode]['retrieve_timeout'];
   }
 }
 

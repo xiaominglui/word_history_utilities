@@ -136,6 +136,8 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
               if (snapshot.hasError) {
                 if (snapshot.error is UnknownMergeStrategyException) {
                   _showMergeStrategryChooserDialog();
+                } else if(snapshot.error is TimeoutException) {
+                  return Text(MinimalLocalizations.of(context).retrieveTimeout);
                 } else {
                   return Text("${snapshot.error}");
                 }
@@ -661,7 +663,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
       throw Exception('Failed to load history words');
     } on TimeoutException catch (e) {
       print('Timeout: $e');
-      throw Exception('retrieve word timeout');
+      throw TimeoutException('retrieve word timeout');
     }
   }
 
