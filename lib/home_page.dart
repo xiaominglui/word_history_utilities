@@ -107,7 +107,11 @@ class HomePageState extends State<HomePage> {
               leading: Icon(Icons.help),
               title: Text(MinimalLocalizations.of(context).helpMenu),
               onTap: () async {
-                final url = 'https://policies.google.com/privacy?hl=en';
+                String cc =
+                    MinimalLocalizations.of(context).locale.languageCode;
+                final url =
+                    'https://xiaominglui.github.io/word_history_utilities/?hl=' +
+                        cc;
                 if (await canLaunch(url)) {
                   await launch(
                     url,
@@ -128,8 +132,12 @@ class HomePageState extends State<HomePage> {
                       style: Theme.of(context).textTheme.caption,
                       recognizer: new TapGestureRecognizer()
                         ..onTap = () async {
+                          String cc = MinimalLocalizations.of(context)
+                              .locale
+                              .languageCode;
                           final url =
-                              'https://policies.google.com/privacy?hl=en';
+                              'https://xiaominglui.github.io/word_history_utilities/privacy/?hl=' +
+                                  cc;
                           if (await canLaunch(url)) {
                             await launch(
                               url,
@@ -145,7 +153,12 @@ class HomePageState extends State<HomePage> {
                       style: Theme.of(context).textTheme.caption,
                       recognizer: new TapGestureRecognizer()
                         ..onTap = () async {
-                          final url = 'https://policies.google.com/terms?hl=en';
+                          String cc = MinimalLocalizations.of(context)
+                              .locale
+                              .languageCode;
+                          final url =
+                              'https://xiaominglui.github.io/word_history_utilities/terms/?hl=' +
+                                  cc;
                           if (await canLaunch(url)) {
                             await launch(
                               url,
@@ -161,8 +174,12 @@ class HomePageState extends State<HomePage> {
                       style: Theme.of(context).textTheme.caption,
                       recognizer: new TapGestureRecognizer()
                         ..onTap = () async {
+                          String cc = MinimalLocalizations.of(context)
+                              .locale
+                              .languageCode;
                           final url =
-                              'https://support.google.com/photos/answer/9292998?hl=en';
+                              'https://xiaominglui.github.io/word_history_utilities/policy/?hl=' +
+                                  cc;
                           if (await canLaunch(url)) {
                             await launch(
                               url,
