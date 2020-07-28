@@ -13,7 +13,7 @@ class MinimalLocalizations {
 
   static Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'title_app': 'Google Dictionary Word History Utility',
+      'title_app': 'Google Dictionary Word History Utilities',
       'title_word': "Word",
       'title_definision': "Definision",
       'title_from': 'Source',

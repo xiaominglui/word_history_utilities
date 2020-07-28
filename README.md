@@ -1,4 +1,4 @@
-# Google Dictionary Word History Utility
+# Google Dictionary Word History Utilities
 
 The Chrome Extension which built with Flutter that organize your word history, and make use of it at most.
 
