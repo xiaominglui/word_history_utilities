@@ -110,7 +110,7 @@ class HomePageState extends State<HomePage> {
                 String cc =
                     MinimalLocalizations.of(context).locale.languageCode;
                 final url =
-                    'https://xiaominglui.github.io/word_history_utilities/?hl=' +
+                    'https://xiaominglui.github.io/word_history_utilities/help/?hl=' +
                         cc;
                 if (await canLaunch(url)) {
                   await launch(
