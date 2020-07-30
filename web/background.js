@@ -6,27 +6,8 @@
 
 chrome.browserAction.onClicked.addListener(function (tab) {
   openOrFocusBackgroundPage();
-  // debug()
-  // fetchHistoryWords();
 });
 
-
-function debug() {
-  chrome.storage.local.set({
-    "word-history": {}
-  })
-  var key = null;
-  chrome.storage.local.get("word-history", function (result) {
-    console.log('result='+JSON.stringify(result));
-    key = "key" + "<";
-    result["word-history"][key] = "value";
-    console.log('result='+JSON.stringify(result));
-    chrome.storage.local.set(result);
-  });
-
-  // localStorage.setItem('k', 'v');
-
-}
 // Open options page
 function openOrFocusBackgroundPage() {
   var optionsUrl = chrome.extension.getURL('index.html');
@@ -45,34 +26,3 @@ function openOrFocusBackgroundPage() {
     }
   });
 }
-
-
-function fetchHistoryWords() {
-  var transformWordHistory;
-
-  chrome.runtime.sendMessage('mgijmajocgfcbeboacabfgobmjgjcoja', { getHistory: true }, {}, function (words) {
-    console.log(typeof words);
-    console.log(words);
-    var w = transformWordHistory(words);
-    console.log(typeof w);
-    console.log(w);
-  });
-
-  // transform word history from google dictionary into our format
-  transformWordHistory = function (words) {
-    // words in an object which key is the word and value is the definition
-    var vocabWords = [];
-    var k, splited;
-    for (k in words) {
-      if (words.hasOwnProperty(k)) {
-        splited = k.split('<');
-        if (splited.length >= 3) {
-          vocabWords.push({ from: splited[0], to: splited[1], word: splited[2], definition: words[k] });
-        }
-      }
-    }
-    return vocabWords;
-  };
-}
-
-
