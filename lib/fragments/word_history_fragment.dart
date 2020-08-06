@@ -318,9 +318,12 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
                                             .format(List<String>()
                                               ..add(
                                                   wordsToShow.length.toString())
-                                              ..add(timeago.format(DateTime
-                                                  .fromMillisecondsSinceEpoch(
-                                                      syncTimestramp), locale: MinimalLocalizations.of(context).locale.languageCode))),
+                                              ..add(timeago
+                                                  .format(DateTime.fromMillisecondsSinceEpoch(syncTimestramp),
+                                                      locale:
+                                                          MinimalLocalizations.of(context)
+                                                              .locale
+                                                              .languageCode))),
                                         other: MinimalLocalizations.of(context)
                                             .syncStatusPlural
                                             .format(List<String>()
@@ -442,7 +445,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     map['word-history-snapshot'] = Chrome.mapToJSObj(list);
 
     try {
-      await Chrome.Extension.storageSyncSet(Chrome.mapToJSObj(map))
+      await Chrome.Extension.storageLocalSet(Chrome.mapToJSObj(map))
           .then((value) => print('storage sync set'));
     } catch (e) {
       print('storeCache Caught e: $e');
@@ -453,22 +456,24 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     print('loadCache');
     try {
       final result =
-          await Chrome.Extension.storageSyncGet('word-history-snapshot');
+          await Chrome.Extension.storageLocalGet('word-history-snapshot');
       Map resultMap = Chrome.mapify(result);
       Map list = resultMap['word-history-snapshot'];
       var hw = <HistoryWord>[];
-      list.forEach((key, value) {
-        var splitedKey = key.toString().split('<');
-        var splitedValue = value.toString().split('<');
-        hw.add(HistoryWord(
-            from: splitedKey[0],
-            to: splitedKey[1],
-            word: splitedKey[2],
-            definition: splitedValue[0],
-            storeTimestamp: int.parse(splitedValue[1]),
-            isNew: splitedValue[3].toLowerCase() == 'true',
-            deleted: splitedValue[2].toLowerCase() == 'true'));
-      });
+      if (list != null) {
+        list.forEach((key, value) {
+          var splitedKey = key.toString().split('<');
+          var splitedValue = value.toString().split('<');
+          hw.add(HistoryWord(
+              from: splitedKey[0],
+              to: splitedKey[1],
+              word: splitedKey[2],
+              definition: splitedValue[0],
+              storeTimestamp: int.parse(splitedValue[1]),
+              isNew: splitedValue[3].toLowerCase() == 'true',
+              deleted: splitedValue[2].toLowerCase() == 'true'));
+        });
+      }
 
       if (hw.length > 0) {
         return hw;
@@ -522,7 +527,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
     print('fetchHistoryWords: $force');
     if (mergeStrategy == null) {
       try {
-        final resOptions = await Chrome.Extension.storageLocalGet(null);
+        final resOptions = await Chrome.Extension.storageSyncGet(null);
         print(Chrome.stringify(resOptions));
         Map map = jsonDecode(Chrome.stringify(resOptions));
         if (map['cbvAlwaysMerge'] == true) {
@@ -530,7 +535,7 @@ class WordHistoryFragmentState extends State<WordHistoryFragment> {
         } else {
           mergeStrategy = -1;
         }
-        autoSync = map['cbvAutoSync'];
+        autoSync = map['cbvAutoSync'] ?? true;
         print('merge strategy init: $mergeStrategy, $autoSync');
       } catch (e) {
         print('err on load options: $e');

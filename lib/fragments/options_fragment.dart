@@ -63,7 +63,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
     map['cbvAlwaysMerge'] = o.always_merge;
     try {
       var jsObj = Chrome.mapToJSObj(map);
-      await Chrome.Extension.storageLocalSet(jsObj);
+      await Chrome.Extension.storageSyncSet(jsObj);
     } catch (e) {
       print('Caught e: $e');
     }
@@ -71,7 +71,7 @@ class _OptionsFragmentState extends State<OptionsFragment> {
 
   Future<AppOptions> getAppOptions() async {
     try {
-      final res = await Chrome.Extension.storageLocalGet(null);
+      final res = await Chrome.Extension.storageSyncGet(null);
       // print(Chrome.stringify(res));
       Map map = jsonDecode(Chrome.stringify(res));
 
