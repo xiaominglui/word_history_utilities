@@ -3,7 +3,7 @@
 The Chrome Extension which built with Flutter that organize your word history, and make use of it at most.
 
 ## Download
-Coming soon
+[Chrome Web Store](https://chrome.google.com/webstore/detail/google-dictionary-word-hi/knndhbmjcbkldgklmbkhplkbddchdofh)
 ## Build Project
 ```
 git clone https://github.com/xiaominglui/word_history_utilities.git
