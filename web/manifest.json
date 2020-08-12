@@ -5,8 +5,7 @@
     "permissions": [
         "tabs",
         "activeTab",
-        "storage",
-        "unlimitedStorage"
+        "storage"
     ],
     "background": {
         "scripts": [
