@@ -1,6 +1,6 @@
 {
     "name": "Google Dictionary Word History Utilities",
-    "version": "0.99",
+    "version": "0.999",
     "description": "Organize your word history, and make use of it at most.",
     "permissions": [
         "tabs",
